@@ -21,13 +21,12 @@
       --soft-good: #dcfce7;
       --soft-warning: #fef3c7;
       --soft-danger: #fee2e2;
+      --month-color: #2563eb;
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
       --radius: 18px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -37,25 +36,16 @@
     }
 
     header {
-      background: linear-gradient(135deg, #2563eb, #1e40af);
+      background: linear-gradient(135deg, var(--month-color), #1e293b);
       color: white;
-      padding: 28px 18px;
+      padding: calc(28px + env(safe-area-inset-top)) 18px 28px;
+      transition: background 0.2s ease;
     }
 
-    .header-inner {
-      max-width: 1180px;
-      margin: 0 auto;
-    }
+    .header-inner { max-width: 1180px; margin: 0 auto; }
 
-    h1 {
-      margin: 0 0 6px;
-      font-size: clamp(1.7rem, 4vw, 2.5rem);
-    }
-
-    .subtitle {
-      margin: 0;
-      opacity: 0.9;
-    }
+    h1 { margin: 0 0 6px; font-size: clamp(1.7rem, 4vw, 2.5rem); }
+    .subtitle { margin: 0; opacity: 0.9; }
 
     .app {
       max-width: 1180px;
@@ -74,6 +64,8 @@
     .top-card {
       padding: 16px;
       margin-bottom: 16px;
+      border-top: 10px solid var(--month-color);
+      transition: border-color 0.2s ease;
     }
 
     .month-row {
@@ -84,10 +76,7 @@
       flex-wrap: wrap;
     }
 
-    .month-title {
-      font-weight: 800;
-      font-size: 1.3rem;
-    }
+    .month-title { font-weight: 800; font-size: 1.3rem; }
 
     .month-controls,
     .tabs,
@@ -120,39 +109,19 @@
     }
 
     button:hover,
-    .button-like:hover {
-      transform: translateY(-1px);
-      filter: brightness(0.98);
-    }
+    .button-like:hover { transform: translateY(-1px); filter: brightness(0.98); }
 
-    button.primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    button.primary:hover {
-      background: var(--primary-dark);
-    }
-
-    button.danger {
-      background: var(--soft-danger);
-      color: var(--danger);
-    }
-
-    button.warning {
-      background: var(--soft-warning);
-      color: #92400e;
-    }
-
-    button.ghost {
-      background: #f3f4f6;
-      color: #374151;
-    }
+    button.primary { background: var(--primary); color: white; }
+    button.primary:hover { background: var(--primary-dark); }
+    button.danger { background: var(--soft-danger); color: var(--danger); }
+    button.warning { background: var(--soft-warning); color: #92400e; }
+    button.ghost { background: #f3f4f6; color: #374151; }
 
     button.tab {
       background: transparent;
       color: var(--muted);
       border: 1px solid var(--border);
+      min-height: 44px;
     }
 
     button.tab.active {
@@ -161,50 +130,22 @@
       border-color: var(--primary);
     }
 
-    button:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      transform: none;
-    }
+    button.tab.tab-purchases { min-width: 170px; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-    .tab-panel {
-      display: none;
-    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
-    .tab-panel.active {
-      display: block;
-    }
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
-    .grid {
-      display: grid;
-      gap: 16px;
-    }
+    .card { padding: 18px; margin-bottom: 16px; }
+    #dashboard > .card { margin-top: 16px; }
+    .card h2, .card h3 { margin: 0 0 12px; }
 
-    .grid.two {
-      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    }
-
-    .grid.three {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .card {
-      padding: 18px;
-      margin-bottom: 16px;
-    }
-
-    .card h2,
-    .card h3 {
-      margin: 0 0 12px;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .small {
-      font-size: 0.9rem;
-    }
+    .muted { color: var(--muted); }
+    .small { font-size: 0.9rem; }
 
     .summary-card {
       padding: 18px;
@@ -213,23 +154,40 @@
       border: 1px solid var(--border);
     }
 
-    .summary-card .label {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 5px;
+    .summary-card .label { color: var(--muted); font-size: 0.9rem; margin-bottom: 5px; }
+    .summary-card .value { font-weight: 900; font-size: 1.35rem; }
+
+    .budget-carousel {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(290px, 430px);
+      gap: 14px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      padding: 4px 2px 16px;
+      -webkit-overflow-scrolling: touch;
     }
 
-    .summary-card .value {
-      font-weight: 900;
-      font-size: 1.35rem;
-    }
+    .budget-carousel::-webkit-scrollbar { height: 8px; }
+    .budget-carousel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
 
     .budget-card {
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 16px;
-      margin-top: 12px;
       background: #fff;
+      scroll-snap-align: start;
+      min-height: 245px;
+    }
+
+    .budget-card.clickable {
+      cursor: pointer;
+    }
+
+    .budget-card.clickable:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
     }
 
     .budget-head {
@@ -241,10 +199,7 @@
       margin-bottom: 10px;
     }
 
-    .budget-name {
-      font-weight: 900;
-      font-size: 1.07rem;
-    }
+    .budget-name { font-weight: 900; font-size: 1.07rem; }
 
     .tag {
       display: inline-flex;
@@ -273,20 +228,9 @@
       white-space: nowrap;
     }
 
-    .status.good {
-      background: var(--soft-good);
-      color: var(--good);
-    }
-
-    .status.warning {
-      background: var(--soft-warning);
-      color: #92400e;
-    }
-
-    .status.danger {
-      background: var(--soft-danger);
-      color: var(--danger);
-    }
+    .status.good { background: var(--soft-good); color: var(--good); }
+    .status.warning { background: var(--soft-warning); color: #92400e; }
+    .status.danger { background: var(--soft-danger); color: var(--danger); }
 
     .progress-wrap {
       width: 100%;
@@ -297,30 +241,12 @@
       margin: 12px 0;
     }
 
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      transition: width 0.2s ease;
-    }
+    .progress-bar { height: 100%; width: 0%; border-radius: 999px; transition: width 0.2s ease; }
+    .progress-bar.good { background: var(--good); }
+    .progress-bar.warning { background: var(--warning); }
+    .progress-bar.danger { background: var(--danger); }
 
-    .progress-bar.good {
-      background: var(--good);
-    }
-
-    .progress-bar.warning {
-      background: var(--warning);
-    }
-
-    .progress-bar.danger {
-      background: var(--danger);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-    }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 
     .stat {
       padding: 10px;
@@ -329,21 +255,10 @@
       border: 1px solid var(--border);
     }
 
-    .stat .label {
-      color: var(--muted);
-      font-size: 0.78rem;
-      margin-bottom: 4px;
-    }
+    .stat .label { color: var(--muted); font-size: 0.78rem; margin-bottom: 4px; }
+    .stat .value { font-weight: 900; }
 
-    .stat .value {
-      font-weight: 900;
-    }
-
-    label {
-      display: block;
-      font-weight: 800;
-      margin: 12px 0 6px;
-    }
+    label { display: block; font-weight: 800; margin: 12px 0 6px; }
 
     input,
     select,
@@ -365,17 +280,8 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
     }
 
-    .form-note {
-      font-size: 0.86rem;
-      color: var(--muted);
-      margin-top: 8px;
-      line-height: 1.4;
-    }
-
-    .list {
-      display: grid;
-      gap: 10px;
-    }
+    .form-note { font-size: 0.86rem; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+    .list { display: grid; gap: 10px; }
 
     .list-item {
       border: 1px solid var(--border);
@@ -388,22 +294,14 @@
       align-items: flex-start;
     }
 
-    .item-title {
-      font-weight: 900;
-      margin-bottom: 5px;
+    .purchase-list-item {
+      border-width: 2px;
+      border-color: #dbe3ef;
     }
 
-    .item-meta {
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-
-    .item-amount {
-      font-weight: 900;
-      font-size: 1.05rem;
-      white-space: nowrap;
-    }
+    .item-title { font-weight: 900; margin-bottom: 5px; }
+    .item-meta { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
+    .item-amount { font-weight: 900; font-size: 1.05rem; white-space: nowrap; }
 
     .empty {
       border: 1px dashed #cbd5e1;
@@ -422,42 +320,63 @@
       font-weight: 700;
     }
 
-    .notice.show {
-      display: block;
+    .notice.show { display: block; }
+    .notice.success { background: var(--soft-good); color: var(--good); }
+    .notice.error { background: var(--soft-danger); color: var(--danger); }
+    .notice.warning { background: var(--soft-warning); color: #92400e; }
+    .duplicate-warning { margin-top: 10px; }
+    .hidden { display: none !important; }
+    .file-input { padding: 9px; background: #f9fafb; }
+    .danger-zone { border-color: #fecaca; background: #fff7f7; }
+
+    .mop-total-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
     }
 
-    .notice.success {
-      background: var(--soft-good);
-      color: var(--good);
+    .mop-total-name { font-weight: 900; font-size: 1.08rem; }
+    .mop-total-amount { font-weight: 950; font-size: 1.3rem; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px;
+      z-index: 999;
     }
 
-    .notice.error {
-      background: var(--soft-danger);
-      color: var(--danger);
+    .modal-backdrop.show { display: flex; }
+
+    .modal {
+      width: min(720px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: white;
+      border-radius: 22px;
+      box-shadow: 0 22px 70px rgba(0,0,0,0.28);
+      padding: 18px;
     }
 
-    .notice.warning {
-      background: var(--soft-warning);
-      color: #92400e;
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
     }
 
-    .duplicate-warning {
-      margin-top: 10px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .file-input {
-      padding: 9px;
-      background: #f9fafb;
-    }
-
-    .danger-zone {
-      border-color: #fecaca;
-      background: #fff7f7;
-    }
+    .modal-title { font-size: 1.25rem; font-weight: 950; margin: 0; }
 
     footer {
       max-width: 1180px;
@@ -471,39 +390,53 @@
     @media (max-width: 850px) {
       .grid.two,
       .grid.three,
-      .stats {
-        grid-template-columns: 1fr;
-      }
+      .stats { grid-template-columns: 1fr; }
 
-      .budget-head {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
+      h1 { font-size: 2rem; }
 
-      .status {
-        justify-self: start;
-      }
+      .budget-head { display: grid; grid-template-columns: 1fr; }
+      .status { justify-self: start; }
 
-      .list-item {
-        flex-direction: column;
-      }
-
-      .item-amount {
-        white-space: normal;
-      }
+      .list-item { flex-direction: column; }
+      .item-amount { white-space: normal; }
 
       .month-controls,
-      .tabs,
       .form-actions,
-      .row-actions {
-        width: 100%;
-      }
+      .row-actions { width: 100%; }
 
       .month-controls button,
-      .tabs button,
-      .form-actions button {
-        flex: 1;
+      .form-actions button { flex: 1; }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 8px;
       }
+
+      .tabs button {
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .tab-dashboard,
+      .tab-budgets,
+      .tab-mop {
+        grid-column: span 2;
+      }
+
+      .tab-import,
+      .tab-mop-totals {
+        grid-column: span 3;
+      }
+
+      .tab-purchases {
+        grid-column: 1 / -1;
+      }
+
+      .budget-carousel { grid-auto-columns: minmax(278px, 86vw); }
+      .modal-backdrop { align-items: flex-end; padding: 10px; }
     }
   </style>
 </head>
@@ -532,11 +465,12 @@
       </div>
 
       <nav class="tabs" aria-label="App sections">
-        <button type="button" class="tab active" data-tab="dashboard">Dashboard</button>
-        <button type="button" class="tab" data-tab="budgets">Budgets</button>
-        <button type="button" class="tab" data-tab="purchases">Purchases</button>
-        <button type="button" class="tab" data-tab="paymentMethods">Payment Methods</button>
-        <button type="button" class="tab" data-tab="importExport">Import / Export</button>
+        <button type="button" class="tab tab-dashboard" data-tab="dashboard">Dashboard</button>
+        <button type="button" class="tab tab-budgets" data-tab="budgets">Budgets</button>
+        <button type="button" class="tab tab-mop" data-tab="paymentMethods">MOP</button>
+        <button type="button" class="tab tab-import" data-tab="importExport">Import / Export</button>
+        <button type="button" class="tab tab-mop-totals" data-tab="mopTotals">MOP Totals</button>
+        <button type="button" class="tab tab-purchases" data-tab="purchases">Purchases</button>
       </nav>
     </section>
 
@@ -560,9 +494,7 @@
 
       <div class="card">
         <h2>Budget Dashboard</h2>
-        <p class="muted">
-          Purchases are matched to budgets by tag. Matching is case-insensitive.
-        </p>
+        <p class="muted">Swipe left and right to see this month's budgets. Tap a budget to see the purchases that make it up.</p>
         <div id="duplicateTagWarning" class="notice warning duplicate-warning"></div>
         <div id="dashboardBudgetList"></div>
       </div>
@@ -575,7 +507,6 @@
 
           <form id="budgetForm">
             <input type="hidden" id="budgetId" />
-
             <label for="budgetName">Budget name</label>
             <input id="budgetName" placeholder="Groceries, Rent, Dining Out" />
 
@@ -592,9 +523,7 @@
               <option value="one-time">One-time for selected month</option>
             </select>
 
-            <p class="form-note">
-              Recurring budgets appear in every month. One-time budgets only appear in the selected month where they were created.
-            </p>
+            <p class="form-note">Recurring budgets appear in every month. One-time budgets only appear in the selected month where they were created.</p>
 
             <div class="form-actions" style="margin-top: 14px;">
               <button type="submit" class="primary">Save budget</button>
@@ -606,6 +535,42 @@
         <div class="card">
           <h2>Budgets for Selected Month</h2>
           <div id="budgetList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="paymentMethods" class="tab-panel">
+      <div class="grid two">
+        <div class="card">
+          <h2 id="paymentFormTitle">Add MOP</h2>
+
+          <form id="paymentForm">
+            <input type="hidden" id="paymentMethodId" />
+
+            <label for="paymentMethodName">MOP name</label>
+            <input id="paymentMethodName" placeholder="Chase Freedom, Amex Gold, Debit Card, Cash, Venmo" />
+
+            <label for="paymentMethodType">Optional type</label>
+            <select id="paymentMethodType">
+              <option value="">Select a type</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Debit Card">Debit Card</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Account">Bank Account</option>
+              <option value="Digital Wallet">Digital Wallet</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <div class="form-actions" style="margin-top: 14px;">
+              <button type="submit" class="primary">Save MOP</button>
+              <button type="button" id="cancelPaymentEditBtn" class="ghost hidden">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>MOP</h2>
+          <div id="paymentMethodList" class="list"></div>
         </div>
       </div>
     </section>
@@ -628,7 +593,7 @@
             <input id="purchaseTag" list="purchaseTagOptions" placeholder="groceries" />
             <datalist id="purchaseTagOptions"></datalist>
 
-            <label for="purchasePaymentMethod">Payment method/card used</label>
+            <label for="purchasePaymentMethod">MOP used</label>
             <select id="purchasePaymentMethod"></select>
 
             <label for="purchaseDate">Date</label>
@@ -648,38 +613,11 @@
       </div>
     </section>
 
-    <section id="paymentMethods" class="tab-panel">
-      <div class="grid two">
-        <div class="card">
-          <h2 id="paymentFormTitle">Add Payment Method</h2>
-
-          <form id="paymentForm">
-            <input type="hidden" id="paymentMethodId" />
-
-            <label for="paymentMethodName">Payment method name</label>
-            <input id="paymentMethodName" placeholder="Chase Freedom, Amex Gold, Debit Card, Cash" />
-
-            <label for="paymentMethodType">Optional type</label>
-            <select id="paymentMethodType">
-              <option value="">Select a type</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="Debit Card">Debit Card</option>
-              <option value="Cash">Cash</option>
-              <option value="Bank Account">Bank Account</option>
-              <option value="Other">Other</option>
-            </select>
-
-            <div class="form-actions" style="margin-top: 14px;">
-              <button type="submit" class="primary">Save payment method</button>
-              <button type="button" id="cancelPaymentEditBtn" class="ghost hidden">Cancel edit</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
-          <h2>Payment Methods</h2>
-          <div id="paymentMethodList" class="list"></div>
-        </div>
+    <section id="mopTotals" class="tab-panel">
+      <div class="card">
+        <h2>MOP Totals for <span id="mopTotalsMonthLabel"></span></h2>
+        <p class="muted">Use these totals to cross-reference your credit card, debit card, cash, Venmo, and bank statements offline.</p>
+        <div id="mopTotalsList" class="list"></div>
       </div>
     </section>
 
@@ -687,17 +625,13 @@
       <div class="grid two">
         <div class="card">
           <h2>Export Data</h2>
-          <p class="muted">
-            Download all budgets, purchases, and payment methods as a JSON backup file.
-          </p>
+          <p class="muted">Download all budgets, purchases, and MOPs as a JSON backup file.</p>
           <button type="button" id="exportBtn" class="primary">Export JSON</button>
         </div>
 
         <div class="card">
           <h2>Import Data</h2>
-          <p class="muted">
-            Import a previously exported JSON file. This replaces your current app data after confirmation.
-          </p>
+          <p class="muted">Import a previously exported JSON file. This replaces your current app data after confirmation.</p>
           <input id="importFile" class="file-input" type="file" accept="application/json,.json" />
           <div class="form-actions" style="margin-top: 14px;">
             <button type="button" id="importBtn" class="primary">Import JSON</button>
@@ -707,27 +641,50 @@
 
       <div class="card danger-zone">
         <h2>Reset All Data</h2>
-        <p class="muted">
-          This permanently deletes all local budgets, purchases, and payment methods stored in this browser.
-        </p>
+        <p class="muted">This permanently deletes all local budgets, purchases, and MOPs stored in this browser.</p>
         <button type="button" id="resetBtn" class="danger">Reset all data</button>
       </div>
     </section>
   </main>
+
+  <div id="budgetModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="budgetModalTitle" class="modal-title">Budget purchases</h2>
+          <div id="budgetModalSubtitle" class="muted small"></div>
+        </div>
+        <button type="button" id="closeBudgetModalBtn" class="ghost">Close</button>
+      </div>
+      <div id="budgetModalContent"></div>
+    </div>
+  </div>
 
   <footer>
     Data is stored locally in this browser using localStorage. No backend, account, or database is required.
   </footer>
 
   <script>
-    const STORAGE_KEY = "monthlyBudgetTrackerData_v1";
+    const STORAGE_KEY = "monthlyBudgetTrackerData_v2";
+    const OLD_STORAGE_KEY = "monthlyBudgetTrackerData_v1";
+
+    const MONTH_COLORS = {
+      "01": "#001f54",
+      "02": "#9f2f24",
+      "03": "#14532d",
+      "04": "#2563eb",
+      "05": "#16a34a",
+      "06": "#60a5fa",
+      "07": "#facc15",
+      "08": "#d2b48c",
+      "09": "#7c4a2d",
+      "10": "#f97316",
+      "11": "#9f2f24",
+      "12": "#60a5fa"
+    };
 
     const state = {
-      data: {
-        budgets: [],
-        purchases: [],
-        paymentMethods: []
-      },
+      data: { budgets: [], purchases: [], paymentMethods: [] },
       selectedMonth: getCurrentMonth(),
       activeTab: "dashboard"
     };
@@ -783,6 +740,15 @@
       paymentMethodList: document.getElementById("paymentMethodList"),
       cancelPaymentEditBtn: document.getElementById("cancelPaymentEditBtn"),
 
+      mopTotalsMonthLabel: document.getElementById("mopTotalsMonthLabel"),
+      mopTotalsList: document.getElementById("mopTotalsList"),
+
+      budgetModalBackdrop: document.getElementById("budgetModalBackdrop"),
+      budgetModalTitle: document.getElementById("budgetModalTitle"),
+      budgetModalSubtitle: document.getElementById("budgetModalSubtitle"),
+      budgetModalContent: document.getElementById("budgetModalContent"),
+      closeBudgetModalBtn: document.getElementById("closeBudgetModalBtn"),
+
       exportBtn: document.getElementById("exportBtn"),
       importBtn: document.getElementById("importBtn"),
       importFile: document.getElementById("importFile"),
@@ -793,8 +759,10 @@
 
     function init() {
       loadData();
+      ensureVenmoExists();
       setupEventListeners();
       setDefaultPurchaseDate();
+      saveData();
       renderAll();
     }
 
@@ -822,6 +790,11 @@
       els.paymentForm.addEventListener("submit", handlePaymentSubmit);
       els.cancelPaymentEditBtn.addEventListener("click", resetPaymentForm);
 
+      els.closeBudgetModalBtn.addEventListener("click", closeBudgetModal);
+      els.budgetModalBackdrop.addEventListener("click", event => {
+        if (event.target === els.budgetModalBackdrop) closeBudgetModal();
+      });
+
       els.exportBtn.addEventListener("click", exportData);
       els.importBtn.addEventListener("click", importData);
       els.resetBtn.addEventListener("click", resetAllData);
@@ -829,7 +802,7 @@
 
     function loadData() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY);
         if (!raw) return;
 
         const parsed = JSON.parse(raw);
@@ -845,7 +818,22 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
     }
 
+    function ensureVenmoExists() {
+      const exists = state.data.paymentMethods.some(method => {
+        return method.name.trim().toLowerCase() === "venmo";
+      });
+
+      if (!exists) {
+        state.data.paymentMethods.push({
+          id: createId(),
+          name: "Venmo",
+          type: "Digital Wallet"
+        });
+      }
+    }
+
     function renderAll() {
+      renderMonthColor();
       renderMonthLabel();
       renderTabs();
       renderDatalists();
@@ -854,6 +842,12 @@
       renderBudgets();
       renderPurchases();
       renderPaymentMethods();
+      renderMopTotals();
+    }
+
+    function renderMonthColor() {
+      const month = state.selectedMonth.slice(5, 7);
+      document.documentElement.style.setProperty("--month-color", MONTH_COLORS[month] || "#2563eb");
     }
 
     function renderTabs() {
@@ -878,6 +872,7 @@
       let totalSpent = 0;
 
       const duplicateTags = getDuplicateBudgetTags(budgets);
+
       if (duplicateTags.length) {
         els.duplicateTagWarning.textContent =
           "Warning: Multiple budgets in this month use the same tag: " +
@@ -895,57 +890,60 @@
           </div>
         `;
       } else {
-        els.dashboardBudgetList.innerHTML = budgets.map(budget => {
-          const spent = getSpentForBudget(budget, purchases);
-          const remaining = Number(budget.amount) - spent;
-          const percent = Number(budget.amount) > 0 ? (spent / Number(budget.amount)) * 100 : 0;
-          const status = getBudgetStatus(percent);
+        els.dashboardBudgetList.innerHTML = `
+          <div class="budget-carousel">
+            ${budgets.map(budget => {
+              const spent = getSpentForBudget(budget, purchases);
+              const remaining = Number(budget.amount) - spent;
+              const percent = Number(budget.amount) > 0 ? (spent / Number(budget.amount)) * 100 : 0;
+              const status = getBudgetStatus(percent);
 
-          totalBudgeted += Number(budget.amount);
-          totalSpent += spent;
+              totalBudgeted += Number(budget.amount);
+              totalSpent += spent;
 
-          return `
-            <article class="budget-card">
-              <div class="budget-head">
-                <div>
-                  <div class="budget-name">${escapeHtml(budget.name)}</div>
-                  <span class="tag">${escapeHtml(budget.tag)}</span>
-                  <div class="muted small" style="margin-top: 7px;">
-                    ${budget.type === "recurring" ? "Recurring monthly" : "One-time budget"} · Created ${budget.monthCreated}
+              return `
+                <article class="budget-card clickable" onclick="openBudgetDetails('${budget.id}')" title="Tap to see purchases">
+                  <div class="budget-head">
+                    <div>
+                      <div class="budget-name">${escapeHtml(budget.name)}</div>
+                      <span class="tag">${escapeHtml(budget.tag)}</span>
+                      <div class="muted small" style="margin-top: 7px;">
+                        ${budget.type === "recurring" ? "Recurring monthly" : "One-time budget"} · Created ${budget.monthCreated}
+                      </div>
+                    </div>
+                    <span class="status ${status.className}">${status.label}</span>
                   </div>
-                </div>
-                <span class="status ${status.className}">${status.label}</span>
-              </div>
 
-              <div class="progress-wrap" aria-label="Budget progress">
-                <div class="progress-bar ${status.className}" style="width: ${Math.min(percent, 100)}%;"></div>
-              </div>
+                  <div class="progress-wrap" aria-label="Budget progress">
+                    <div class="progress-bar ${status.className}" style="width: ${Math.min(percent, 100)}%;"></div>
+                  </div>
 
-              <div class="stats">
-                <div class="stat">
-                  <div class="label">Budget</div>
-                  <div class="value">${formatCurrency(budget.amount)}</div>
-                </div>
-                <div class="stat">
-                  <div class="label">Spent</div>
-                  <div class="value">${formatCurrency(spent)}</div>
-                </div>
-                <div class="stat">
-                  <div class="label">Remaining</div>
-                  <div class="value">${formatCurrency(remaining)}</div>
-                </div>
-                <div class="stat">
-                  <div class="label">Used</div>
-                  <div class="value">${formatPercent(percent)}</div>
-                </div>
-              </div>
-            </article>
-          `;
-        }).join("");
+                  <div class="stats">
+                    <div class="stat">
+                      <div class="label">Budget</div>
+                      <div class="value">${formatCurrency(budget.amount)}</div>
+                    </div>
+                    <div class="stat">
+                      <div class="label">Spent</div>
+                      <div class="value">${formatCurrency(spent)}</div>
+                    </div>
+                    <div class="stat">
+                      <div class="label">Remaining</div>
+                      <div class="value">${formatCurrency(remaining)}</div>
+                    </div>
+                    <div class="stat">
+                      <div class="label">Used</div>
+                      <div class="value">${formatPercent(percent)}</div>
+                    </div>
+                  </div>
+                </article>
+              `;
+            }).join("")}
+          </div>
+        `;
       }
 
       if (!budgets.length) {
-        totalBudgeted = 0;
         totalSpent = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
       }
 
@@ -958,9 +956,7 @@
       const budgets = getBudgetsForSelectedMonth();
 
       if (!budgets.length) {
-        els.budgetList.innerHTML = `
-          <div class="empty">No budgets yet for this month.</div>
-        `;
+        els.budgetList.innerHTML = `<div class="empty">No budgets yet for this month.</div>`;
         return;
       }
 
@@ -975,7 +971,9 @@
               Created: ${budget.monthCreated}
             </div>
           </div>
+
           <div class="row-actions">
+            <button type="button" class="ghost" onclick="openBudgetDetails('${budget.id}')">View Purchases</button>
             <button type="button" class="ghost" onclick="editBudget('${budget.id}')">Edit</button>
             <button type="button" class="danger" onclick="deleteBudget('${budget.id}')">Delete</button>
           </div>
@@ -989,24 +987,24 @@
         .sort((a, b) => b.date.localeCompare(a.date));
 
       if (!purchases.length) {
-        els.purchaseList.innerHTML = `
-          <div class="empty">No purchases yet for this month.</div>
-        `;
+        els.purchaseList.innerHTML = `<div class="empty">No purchases yet for this month.</div>`;
         return;
       }
 
       els.purchaseList.innerHTML = purchases.map(purchase => {
         const payment = getPaymentMethodById(purchase.paymentMethodId);
+
         return `
-          <div class="list-item">
+          <div class="list-item purchase-list-item">
             <div>
               <div class="item-title">${escapeHtml(purchase.name)}</div>
               <div class="item-meta">
                 Date: ${purchase.date}<br>
                 Tag: ${escapeHtml(purchase.tag)}<br>
-                Payment method: ${payment ? escapeHtml(payment.name) : "Deleted payment method"}
+                MOP: ${payment ? escapeHtml(payment.name) : "Deleted MOP"}
               </div>
             </div>
+
             <div>
               <div class="item-amount">${formatCurrency(purchase.amount)}</div>
               <div class="row-actions" style="margin-top: 10px;">
@@ -1023,9 +1021,7 @@
       const methods = state.data.paymentMethods;
 
       if (!methods.length) {
-        els.paymentMethodList.innerHTML = `
-          <div class="empty">No payment methods yet. Add one before entering purchases.</div>
-        `;
+        els.paymentMethodList.innerHTML = `<div class="empty">No MOPs yet. Add one before entering purchases.</div>`;
         return;
       }
 
@@ -1038,9 +1034,10 @@
               <div class="item-title">${escapeHtml(method.name)}</div>
               <div class="item-meta">
                 Type: ${escapeHtml(method.type || "Other")}<br>
-                Purchases using this method: ${useCount}
+                Purchases using this MOP: ${useCount}
               </div>
             </div>
+
             <div class="row-actions">
               <button type="button" class="ghost" onclick="editPaymentMethod('${method.id}')">Edit</button>
               <button type="button" class="danger" onclick="deletePaymentMethod('${method.id}')">Delete</button>
@@ -1048,6 +1045,74 @@
           </div>
         `;
       }).join("");
+    }
+
+    function renderMopTotals() {
+      const purchases = getPurchasesForSelectedMonth();
+      els.mopTotalsMonthLabel.textContent = formatMonthLabel(state.selectedMonth);
+
+      const totalsByMethod = new Map();
+
+      state.data.paymentMethods.forEach(method => {
+        totalsByMethod.set(method.id, {
+          method,
+          total: 0,
+          count: 0
+        });
+      });
+
+      let deletedTotal = 0;
+      let deletedCount = 0;
+
+      purchases.forEach(purchase => {
+        const record = totalsByMethod.get(purchase.paymentMethodId);
+
+        if (record) {
+          record.total += Number(purchase.amount);
+          record.count += 1;
+        } else {
+          deletedTotal += Number(purchase.amount);
+          deletedCount += 1;
+        }
+      });
+
+      const rows = Array.from(totalsByMethod.values())
+        .filter(record => record.count > 0 || record.method.name.toLowerCase() === "venmo")
+        .sort((a, b) => b.total - a.total);
+
+      const grandTotal = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+
+      if (!purchases.length) {
+        els.mopTotalsList.innerHTML = `<div class="empty">No purchases yet for this month.</div>`;
+        return;
+      }
+
+      els.mopTotalsList.innerHTML =
+        rows.map(record => `
+          <div class="mop-total-card">
+            <div>
+              <div class="mop-total-name">${escapeHtml(record.method.name)}</div>
+              <div class="item-meta">${escapeHtml(record.method.type || "Other")} · ${record.count} purchase(s)</div>
+            </div>
+            <div class="mop-total-amount">${formatCurrency(record.total)}</div>
+          </div>
+        `).join("") +
+        (deletedCount
+          ? `<div class="mop-total-card">
+              <div>
+                <div class="mop-total-name">Deleted MOP</div>
+                <div class="item-meta">${deletedCount} purchase(s)</div>
+              </div>
+              <div class="mop-total-amount">${formatCurrency(deletedTotal)}</div>
+            </div>`
+          : "") +
+        `<div class="mop-total-card" style="background:#f8fafc;">
+          <div>
+            <div class="mop-total-name">Monthly Total</div>
+            <div class="item-meta">All MOPs</div>
+          </div>
+          <div class="mop-total-amount">${formatCurrency(grandTotal)}</div>
+        </div>`;
     }
 
     function renderDatalists() {
@@ -1060,18 +1125,65 @@
 
     function renderPaymentMethodOptions() {
       if (!state.data.paymentMethods.length) {
-        els.purchasePaymentMethod.innerHTML = `<option value="">Add a payment method first</option>`;
+        els.purchasePaymentMethod.innerHTML = `<option value="">Add a MOP first</option>`;
         els.purchasePaymentMethod.disabled = true;
         return;
       }
 
       els.purchasePaymentMethod.disabled = false;
-      els.purchasePaymentMethod.innerHTML = `
-        <option value="">Select a payment method</option>
-        ${state.data.paymentMethods.map(method => `
+      els.purchasePaymentMethod.innerHTML =
+        `<option value="">Select a MOP</option>` +
+        state.data.paymentMethods.map(method => `
           <option value="${method.id}">${escapeHtml(method.name)}${method.type ? " · " + escapeHtml(method.type) : ""}</option>
-        `).join("")}
-      `;
+        `).join("");
+    }
+
+    function openBudgetDetails(id) {
+      const budget = state.data.budgets.find(b => b.id === id);
+      if (!budget) return;
+
+      const purchases = getPurchasesForSelectedMonth()
+        .filter(p => normalizeTag(p.tag) === normalizeTag(budget.tag))
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      const spent = purchases.reduce((sum, p) => sum + Number(p.amount), 0);
+      const remaining = Number(budget.amount) - spent;
+
+      els.budgetModalTitle.textContent = budget.name;
+      els.budgetModalSubtitle.textContent =
+        `${formatMonthLabel(state.selectedMonth)} · Tag: ${budget.tag} · Spent ${formatCurrency(spent)} of ${formatCurrency(budget.amount)} · Remaining ${formatCurrency(remaining)}`;
+
+      if (!purchases.length) {
+        els.budgetModalContent.innerHTML =
+          `<div class="empty">No purchases with the tag "${escapeHtml(budget.tag)}" for this month.</div>`;
+      } else {
+        els.budgetModalContent.innerHTML = `
+          <div class="list">
+            ${purchases.map(purchase => {
+              const payment = getPaymentMethodById(purchase.paymentMethodId);
+
+              return `
+                <div class="list-item purchase-list-item">
+                  <div>
+                    <div class="item-title">${escapeHtml(purchase.name)}</div>
+                    <div class="item-meta">
+                      Date: ${purchase.date}<br>
+                      MOP: ${payment ? escapeHtml(payment.name) : "Deleted MOP"}
+                    </div>
+                  </div>
+                  <div class="item-amount">${formatCurrency(purchase.amount)}</div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
+      }
+
+      els.budgetModalBackdrop.classList.add("show");
+    }
+
+    function closeBudgetModal() {
+      els.budgetModalBackdrop.classList.remove("show");
     }
 
     function handleBudgetSubmit(event) {
@@ -1125,6 +1237,7 @@
       els.budgetTag.value = budget.tag;
       els.budgetType.value = budget.type;
       els.cancelBudgetEditBtn.classList.remove("hidden");
+
       renderTabs();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -1133,8 +1246,7 @@
       const budget = state.data.budgets.find(b => b.id === id);
       if (!budget) return;
 
-      const confirmed = confirm(`Delete the budget "${budget.name}"? Purchases will not be deleted.`);
-      if (!confirmed) return;
+      if (!confirm(`Delete the budget "${budget.name}"? Purchases will not be deleted.`)) return;
 
       state.data.budgets = state.data.budgets.filter(b => b.id !== id);
       saveData();
@@ -1164,8 +1276,8 @@
       if (!name) return showNotice("Purchase name is required.", "error");
       if (!Number.isFinite(amount) || amount <= 0) return showNotice("Purchase amount must be greater than 0.", "error");
       if (!tag) return showNotice("Purchase tag is required.", "error");
-      if (!paymentMethodId) return showNotice("Payment method is required.", "error");
-      if (!getPaymentMethodById(paymentMethodId)) return showNotice("Selected payment method is invalid.", "error");
+      if (!paymentMethodId) return showNotice("MOP is required.", "error");
+      if (!getPaymentMethodById(paymentMethodId)) return showNotice("Selected MOP is invalid.", "error");
       if (!isValidDate(date)) return showNotice("Purchase date is invalid.", "error");
 
       if (id) {
@@ -1209,6 +1321,7 @@
       els.purchasePaymentMethod.value = purchase.paymentMethodId;
       els.purchaseDate.value = purchase.date;
       els.cancelPurchaseEditBtn.classList.remove("hidden");
+
       renderTabs();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -1217,8 +1330,7 @@
       const purchase = state.data.purchases.find(p => p.id === id);
       if (!purchase) return;
 
-      const confirmed = confirm(`Delete the purchase "${purchase.name}"?`);
-      if (!confirmed) return;
+      if (!confirm(`Delete the purchase "${purchase.name}"?`)) return;
 
       state.data.purchases = state.data.purchases.filter(p => p.id !== id);
       saveData();
@@ -1243,11 +1355,11 @@
       const name = els.paymentMethodName.value.trim();
       const type = els.paymentMethodType.value;
 
-      if (!name) return showNotice("Payment method name is required.", "error");
+      if (!name) return showNotice("MOP name is required.", "error");
 
       if (id) {
         const method = state.data.paymentMethods.find(m => m.id === id);
-        if (!method) return showNotice("Payment method not found.", "error");
+        if (!method) return showNotice("MOP not found.", "error");
 
         method.name = name;
         method.type = type;
@@ -1262,7 +1374,7 @@
       saveData();
       resetPaymentForm();
       renderAll();
-      showNotice(id ? "Payment method updated." : "Payment method added.", "success");
+      showNotice(id ? "MOP updated." : "MOP added.", "success");
     }
 
     function editPaymentMethod(id) {
@@ -1270,11 +1382,12 @@
       if (!method) return;
 
       state.activeTab = "paymentMethods";
-      els.paymentFormTitle.textContent = "Edit Payment Method";
+      els.paymentFormTitle.textContent = "Edit MOP";
       els.paymentMethodId.value = method.id;
       els.paymentMethodName.value = method.name;
       els.paymentMethodType.value = method.type || "";
       els.cancelPaymentEditBtn.classList.remove("hidden");
+
       renderTabs();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -1285,32 +1398,31 @@
 
       const tiedPurchases = state.data.purchases.filter(p => p.paymentMethodId === id).length;
 
-      let message = `Delete the payment method "${method.name}"?`;
+      let message = `Delete the MOP "${method.name}"?`;
       if (tiedPurchases > 0) {
-        message += `\n\nWarning: ${tiedPurchases} purchase(s) are tied to this payment method. They will remain, but will show as using a deleted payment method.`;
+        message += `\n\nWarning: ${tiedPurchases} purchase(s) are tied to this MOP. They will remain, but will show as using a deleted MOP.`;
       }
 
-      const confirmed = confirm(message);
-      if (!confirmed) return;
+      if (!confirm(message)) return;
 
       state.data.paymentMethods = state.data.paymentMethods.filter(m => m.id !== id);
       saveData();
       resetPaymentForm();
       renderAll();
-      showNotice("Payment method deleted.", "success");
+      showNotice("MOP deleted.", "success");
     }
 
     function resetPaymentForm() {
       els.paymentForm.reset();
       els.paymentMethodId.value = "";
-      els.paymentFormTitle.textContent = "Add Payment Method";
+      els.paymentFormTitle.textContent = "Add MOP";
       els.cancelPaymentEditBtn.classList.add("hidden");
     }
 
     function exportData() {
       const exportPayload = {
         app: "Monthly Budget Tracker",
-        version: 1,
+        version: 2,
         exportedAt: new Date().toISOString(),
         data: state.data
       };
@@ -1351,13 +1463,10 @@
             return;
           }
 
-          const confirmed = confirm(
-            "Importing will replace all current data in this browser. Continue?"
-          );
-
-          if (!confirmed) return;
+          if (!confirm("Importing will replace all current data in this browser. Continue?")) return;
 
           state.data = normalizeImportedData(importedData);
+          ensureVenmoExists();
           saveData();
           resetBudgetForm();
           resetPurchaseForm();
@@ -1374,11 +1483,7 @@
     }
 
     function resetAllData() {
-      const confirmed = confirm(
-        "Reset all data? This permanently deletes all budgets, purchases, and payment methods stored in this browser."
-      );
-
-      if (!confirmed) return;
+      if (!confirm("Reset all data? This permanently deletes all budgets, purchases, and MOPs stored in this browser.")) return;
 
       state.data = {
         budgets: [],
@@ -1386,6 +1491,7 @@
         paymentMethods: []
       };
 
+      ensureVenmoExists();
       saveData();
       resetBudgetForm();
       resetPurchaseForm();
@@ -1396,8 +1502,7 @@
 
     function changeMonth(delta) {
       const [year, month] = state.selectedMonth.split("-").map(Number);
-      const date = new Date(year, month - 1 + delta, 1);
-      state.selectedMonth = toYearMonth(date);
+      state.selectedMonth = toYearMonth(new Date(year, month - 1 + delta, 1));
       renderAll();
     }
 
@@ -1414,12 +1519,10 @@
     }
 
     function getSpentForBudget(budget, purchases) {
-      const budgetTag = normalizeTag(budget.tag);
+      const tag = normalizeTag(budget.tag);
 
-      return purchases.reduce((sum, purchase) => {
-        return normalizeTag(purchase.tag) === budgetTag
-          ? sum + Number(purchase.amount)
-          : sum;
+      return purchases.reduce((sum, p) => {
+        return normalizeTag(p.tag) === tag ? sum + Number(p.amount) : sum;
       }, 0);
     }
 
@@ -1447,17 +1550,15 @@
     function getDuplicateBudgetTags(budgets) {
       const counts = new Map();
 
-      budgets.forEach(budget => {
-        const normalized = normalizeTag(budget.tag);
-        counts.set(normalized, (counts.get(normalized) || 0) + 1);
+      budgets.forEach(b => {
+        counts.set(normalizeTag(b.tag), (counts.get(normalizeTag(b.tag)) || 0) + 1);
       });
 
       const duplicates = [];
 
       counts.forEach((count, normalizedTag) => {
         if (count > 1) {
-          const original = budgets.find(b => normalizeTag(b.tag) === normalizedTag)?.tag || normalizedTag;
-          duplicates.push(original);
+          duplicates.push(budgets.find(b => normalizeTag(b.tag) === normalizedTag)?.tag || normalizedTag);
         }
       });
 
@@ -1467,9 +1568,10 @@
     function getAllBudgetTags() {
       const map = new Map();
 
-      state.data.budgets.forEach(budget => {
-        const normalized = normalizeTag(budget.tag);
-        if (!map.has(normalized)) map.set(normalized, budget.tag);
+      state.data.budgets.forEach(b => {
+        if (!map.has(normalizeTag(b.tag))) {
+          map.set(normalizeTag(b.tag), b.tag);
+        }
       });
 
       return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
@@ -1481,34 +1583,32 @@
 
     function isValidDataShape(value) {
       if (!value || typeof value !== "object") return false;
-      if (!Array.isArray(value.budgets)) return false;
-      if (!Array.isArray(value.purchases)) return false;
-      if (!Array.isArray(value.paymentMethods)) return false;
+      if (!Array.isArray(value.budgets) || !Array.isArray(value.purchases) || !Array.isArray(value.paymentMethods)) return false;
 
-      const budgetsValid = value.budgets.every(budget => {
-        return typeof budget.id === "string" &&
-          typeof budget.name === "string" &&
-          Number.isFinite(Number(budget.amount)) &&
-          typeof budget.tag === "string" &&
-          ["recurring", "one-time"].includes(budget.type) &&
-          typeof budget.monthCreated === "string" &&
-          /^\d{4}-\d{2}$/.test(budget.monthCreated);
+      const budgetsValid = value.budgets.every(b => {
+        return typeof b.id === "string" &&
+          typeof b.name === "string" &&
+          Number.isFinite(Number(b.amount)) &&
+          typeof b.tag === "string" &&
+          ["recurring", "one-time"].includes(b.type) &&
+          typeof b.monthCreated === "string" &&
+          /^\d{4}-\d{2}$/.test(b.monthCreated);
       });
 
-      const purchasesValid = value.purchases.every(purchase => {
-        return typeof purchase.id === "string" &&
-          typeof purchase.name === "string" &&
-          Number.isFinite(Number(purchase.amount)) &&
-          typeof purchase.tag === "string" &&
-          typeof purchase.paymentMethodId === "string" &&
-          typeof purchase.date === "string" &&
-          /^\d{4}-\d{2}-\d{2}$/.test(purchase.date);
+      const purchasesValid = value.purchases.every(p => {
+        return typeof p.id === "string" &&
+          typeof p.name === "string" &&
+          Number.isFinite(Number(p.amount)) &&
+          typeof p.tag === "string" &&
+          typeof p.paymentMethodId === "string" &&
+          typeof p.date === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(p.date);
       });
 
-      const paymentMethodsValid = value.paymentMethods.every(method => {
-        return typeof method.id === "string" &&
-          typeof method.name === "string" &&
-          typeof method.type === "string";
+      const paymentMethodsValid = value.paymentMethods.every(m => {
+        return typeof m.id === "string" &&
+          typeof m.name === "string" &&
+          typeof m.type === "string";
       });
 
       return budgetsValid && purchasesValid && paymentMethodsValid;
@@ -1516,26 +1616,26 @@
 
     function normalizeImportedData(data) {
       return {
-        budgets: data.budgets.map(budget => ({
-          id: String(budget.id),
-          name: String(budget.name).trim(),
-          amount: roundMoney(Number(budget.amount)),
-          tag: String(budget.tag).trim(),
-          type: budget.type,
-          monthCreated: budget.monthCreated
+        budgets: data.budgets.map(b => ({
+          id: String(b.id),
+          name: String(b.name).trim(),
+          amount: roundMoney(Number(b.amount)),
+          tag: String(b.tag).trim(),
+          type: b.type,
+          monthCreated: b.monthCreated
         })),
-        purchases: data.purchases.map(purchase => ({
-          id: String(purchase.id),
-          name: String(purchase.name).trim(),
-          amount: roundMoney(Number(purchase.amount)),
-          tag: String(purchase.tag).trim(),
-          paymentMethodId: String(purchase.paymentMethodId),
-          date: purchase.date
+        purchases: data.purchases.map(p => ({
+          id: String(p.id),
+          name: String(p.name).trim(),
+          amount: roundMoney(Number(p.amount)),
+          tag: String(p.tag).trim(),
+          paymentMethodId: String(p.paymentMethodId),
+          date: p.date
         })),
-        paymentMethods: data.paymentMethods.map(method => ({
-          id: String(method.id),
-          name: String(method.name).trim(),
-          type: String(method.type || "")
+        paymentMethods: data.paymentMethods.map(m => ({
+          id: String(m.id),
+          name: String(m.name).trim(),
+          type: String(m.type || "")
         }))
       };
     }
@@ -1559,23 +1659,17 @@
     }
 
     function toYearMonth(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      return `${year}-${month}`;
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
     }
 
     function toDateInputValue(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     }
 
     function formatMonthLabel(yearMonth) {
       const [year, month] = yearMonth.split("-").map(Number);
-      const date = new Date(year, month - 1, 1);
 
-      return date.toLocaleDateString(undefined, {
+      return new Date(year, month - 1, 1).toLocaleDateString(undefined, {
         month: "long",
         year: "numeric"
       });
@@ -1586,8 +1680,7 @@
     }
 
     function formatPercent(value) {
-      if (!Number.isFinite(value)) return "0%";
-      return `${Math.round(value)}%`;
+      return Number.isFinite(value) ? `${Math.round(value)}%` : "0%";
     }
 
     function normalizeTag(tag) {
@@ -1600,16 +1693,15 @@
 
     function isValidDate(value) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
       const date = new Date(value + "T00:00:00");
       return !Number.isNaN(date.getTime()) && toDateInputValue(date) === value;
     }
 
     function createId() {
-      if (crypto && crypto.randomUUID) {
-        return crypto.randomUUID();
-      }
-
-      return `id_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      return crypto && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `id_${Date.now()}_${Math.random().toString(16).slice(2)}`;
     }
 
     function escapeHtml(value) {
@@ -1621,6 +1713,7 @@
         .replaceAll("'", "&#039;");
     }
 
+    window.openBudgetDetails = openBudgetDetails;
     window.editBudget = editBudget;
     window.deleteBudget = deleteBudget;
     window.editPurchase = editPurchase;

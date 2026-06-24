@@ -1,0 +1,1632 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monthly Budget Tracker</title>
+  <meta name="theme-color" content="#2563eb" />
+
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --good: #16a34a;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --soft-good: #dcfce7;
+      --soft-warning: #fef3c7;
+      --soft-danger: #fee2e2;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      color: white;
+      padding: 28px 18px;
+    }
+
+    .header-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+    }
+
+    .subtitle {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .app {
+      max-width: 1180px;
+      margin: -22px auto 40px;
+      padding: 0 16px;
+    }
+
+    .top-card,
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .top-card {
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .month-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .month-title {
+      font-weight: 800;
+      font-size: 1.3rem;
+    }
+
+    .month-controls,
+    .tabs,
+    .form-actions,
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tabs {
+      margin-top: 14px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    button,
+    .button-like {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 13px;
+      cursor: pointer;
+      font-weight: 700;
+      background: #eef2ff;
+      color: #1e3a8a;
+      transition: 0.15s ease;
+      font-family: inherit;
+      font-size: 0.94rem;
+    }
+
+    button:hover,
+    .button-like:hover {
+      transform: translateY(-1px);
+      filter: brightness(0.98);
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    button.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    button.danger {
+      background: var(--soft-danger);
+      color: var(--danger);
+    }
+
+    button.warning {
+      background: var(--soft-warning);
+      color: #92400e;
+    }
+
+    button.ghost {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    button.tab {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    button.tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0 0 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 0.9rem;
+    }
+
+    .summary-card {
+      padding: 18px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+
+    .summary-card .label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .summary-card .value {
+      font-weight: 900;
+      font-size: 1.35rem;
+    }
+
+    .budget-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      background: #fff;
+    }
+
+    .budget-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .budget-name {
+      font-weight: 900;
+      font-size: 1.07rem;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-weight: 800;
+      font-size: 0.78rem;
+      margin-top: 6px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 96px;
+      min-height: 34px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-weight: 900;
+      font-size: 0.8rem;
+      line-height: 1;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .status.good {
+      background: var(--soft-good);
+      color: var(--good);
+    }
+
+    .status.warning {
+      background: var(--soft-warning);
+      color: #92400e;
+    }
+
+    .status.danger {
+      background: var(--soft-danger);
+      color: var(--danger);
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 13px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.2s ease;
+    }
+
+    .progress-bar.good {
+      background: var(--good);
+    }
+
+    .progress-bar.warning {
+      background: var(--warning);
+    }
+
+    .progress-bar.danger {
+      background: var(--danger);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 10px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+    }
+
+    .stat .value {
+      font-weight: 900;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      margin: 12px 0 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font: inherit;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .form-note {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-item {
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: white;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .item-title {
+      font-weight: 900;
+      margin-bottom: 5px;
+    }
+
+    .item-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .item-amount {
+      font-weight: 900;
+      font-size: 1.05rem;
+      white-space: nowrap;
+    }
+
+    .empty {
+      border: 1px dashed #cbd5e1;
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 22px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .notice {
+      display: none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .notice.success {
+      background: var(--soft-good);
+      color: var(--good);
+    }
+
+    .notice.error {
+      background: var(--soft-danger);
+      color: var(--danger);
+    }
+
+    .notice.warning {
+      background: var(--soft-warning);
+      color: #92400e;
+    }
+
+    .duplicate-warning {
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .file-input {
+      padding: 9px;
+      background: #f9fafb;
+    }
+
+    .danger-zone {
+      border-color: #fecaca;
+      background: #fff7f7;
+    }
+
+    footer {
+      max-width: 1180px;
+      margin: 0 auto 30px;
+      padding: 0 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 850px) {
+      .grid.two,
+      .grid.three,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .budget-head {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .status {
+        justify-self: start;
+      }
+
+      .list-item {
+        flex-direction: column;
+      }
+
+      .item-amount {
+        white-space: normal;
+      }
+
+      .month-controls,
+      .tabs,
+      .form-actions,
+      .row-actions {
+        width: 100%;
+      }
+
+      .month-controls button,
+      .tabs button,
+      .form-actions button {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>Monthly Budget Tracker</h1>
+      <p class="subtitle">Create budgets, track purchases, and monitor spending by month.</p>
+    </div>
+  </header>
+
+  <main class="app">
+    <section class="top-card">
+      <div class="month-row">
+        <div>
+          <div class="muted small">Selected month</div>
+          <div class="month-title" id="selectedMonthLabel"></div>
+        </div>
+
+        <div class="month-controls">
+          <button type="button" id="prevMonthBtn">Previous month</button>
+          <button type="button" id="currentMonthBtn" class="primary">Current month</button>
+          <button type="button" id="nextMonthBtn">Next month</button>
+        </div>
+      </div>
+
+      <nav class="tabs" aria-label="App sections">
+        <button type="button" class="tab active" data-tab="dashboard">Dashboard</button>
+        <button type="button" class="tab" data-tab="budgets">Budgets</button>
+        <button type="button" class="tab" data-tab="purchases">Purchases</button>
+        <button type="button" class="tab" data-tab="paymentMethods">Payment Methods</button>
+        <button type="button" class="tab" data-tab="importExport">Import / Export</button>
+      </nav>
+    </section>
+
+    <div id="notice" class="notice" role="status"></div>
+
+    <section id="dashboard" class="tab-panel active">
+      <div class="grid three">
+        <div class="summary-card">
+          <div class="label">Total budgeted</div>
+          <div class="value" id="totalBudgeted">$0.00</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Total spent</div>
+          <div class="value" id="totalSpent">$0.00</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Total remaining</div>
+          <div class="value" id="totalRemaining">$0.00</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Budget Dashboard</h2>
+        <p class="muted">
+          Purchases are matched to budgets by tag. Matching is case-insensitive.
+        </p>
+        <div id="duplicateTagWarning" class="notice warning duplicate-warning"></div>
+        <div id="dashboardBudgetList"></div>
+      </div>
+    </section>
+
+    <section id="budgets" class="tab-panel">
+      <div class="grid two">
+        <div class="card">
+          <h2 id="budgetFormTitle">Add Budget</h2>
+
+          <form id="budgetForm">
+            <input type="hidden" id="budgetId" />
+
+            <label for="budgetName">Budget name</label>
+            <input id="budgetName" placeholder="Groceries, Rent, Dining Out" />
+
+            <label for="budgetAmount">Budget amount</label>
+            <input id="budgetAmount" type="number" step="0.01" min="0" placeholder="500.00" />
+
+            <label for="budgetTag">Tag</label>
+            <input id="budgetTag" list="budgetTagOptions" placeholder="groceries" />
+            <datalist id="budgetTagOptions"></datalist>
+
+            <label for="budgetType">Budget type</label>
+            <select id="budgetType">
+              <option value="recurring">Recurring monthly</option>
+              <option value="one-time">One-time for selected month</option>
+            </select>
+
+            <p class="form-note">
+              Recurring budgets appear in every month. One-time budgets only appear in the selected month where they were created.
+            </p>
+
+            <div class="form-actions" style="margin-top: 14px;">
+              <button type="submit" class="primary">Save budget</button>
+              <button type="button" id="cancelBudgetEditBtn" class="ghost hidden">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Budgets for Selected Month</h2>
+          <div id="budgetList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="purchases" class="tab-panel">
+      <div class="grid two">
+        <div class="card">
+          <h2 id="purchaseFormTitle">Add Purchase</h2>
+
+          <form id="purchaseForm">
+            <input type="hidden" id="purchaseId" />
+
+            <label for="purchaseName">Purchase name</label>
+            <input id="purchaseName" placeholder="Coffee, groceries, utility bill" />
+
+            <label for="purchaseAmount">Purchase amount</label>
+            <input id="purchaseAmount" type="number" step="0.01" min="0" placeholder="25.00" />
+
+            <label for="purchaseTag">Tag</label>
+            <input id="purchaseTag" list="purchaseTagOptions" placeholder="groceries" />
+            <datalist id="purchaseTagOptions"></datalist>
+
+            <label for="purchasePaymentMethod">Payment method/card used</label>
+            <select id="purchasePaymentMethod"></select>
+
+            <label for="purchaseDate">Date</label>
+            <input id="purchaseDate" type="date" />
+
+            <div class="form-actions" style="margin-top: 14px;">
+              <button type="submit" class="primary">Save purchase</button>
+              <button type="button" id="cancelPurchaseEditBtn" class="ghost hidden">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Purchases for Selected Month</h2>
+          <div id="purchaseList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="paymentMethods" class="tab-panel">
+      <div class="grid two">
+        <div class="card">
+          <h2 id="paymentFormTitle">Add Payment Method</h2>
+
+          <form id="paymentForm">
+            <input type="hidden" id="paymentMethodId" />
+
+            <label for="paymentMethodName">Payment method name</label>
+            <input id="paymentMethodName" placeholder="Chase Freedom, Amex Gold, Debit Card, Cash" />
+
+            <label for="paymentMethodType">Optional type</label>
+            <select id="paymentMethodType">
+              <option value="">Select a type</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Debit Card">Debit Card</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Account">Bank Account</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <div class="form-actions" style="margin-top: 14px;">
+              <button type="submit" class="primary">Save payment method</button>
+              <button type="button" id="cancelPaymentEditBtn" class="ghost hidden">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Payment Methods</h2>
+          <div id="paymentMethodList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="importExport" class="tab-panel">
+      <div class="grid two">
+        <div class="card">
+          <h2>Export Data</h2>
+          <p class="muted">
+            Download all budgets, purchases, and payment methods as a JSON backup file.
+          </p>
+          <button type="button" id="exportBtn" class="primary">Export JSON</button>
+        </div>
+
+        <div class="card">
+          <h2>Import Data</h2>
+          <p class="muted">
+            Import a previously exported JSON file. This replaces your current app data after confirmation.
+          </p>
+          <input id="importFile" class="file-input" type="file" accept="application/json,.json" />
+          <div class="form-actions" style="margin-top: 14px;">
+            <button type="button" id="importBtn" class="primary">Import JSON</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card danger-zone">
+        <h2>Reset All Data</h2>
+        <p class="muted">
+          This permanently deletes all local budgets, purchases, and payment methods stored in this browser.
+        </p>
+        <button type="button" id="resetBtn" class="danger">Reset all data</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Data is stored locally in this browser using localStorage. No backend, account, or database is required.
+  </footer>
+
+  <script>
+    const STORAGE_KEY = "monthlyBudgetTrackerData_v1";
+
+    const state = {
+      data: {
+        budgets: [],
+        purchases: [],
+        paymentMethods: []
+      },
+      selectedMonth: getCurrentMonth(),
+      activeTab: "dashboard"
+    };
+
+    const currencyFormatter = new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "USD"
+    });
+
+    const els = {
+      selectedMonthLabel: document.getElementById("selectedMonthLabel"),
+      prevMonthBtn: document.getElementById("prevMonthBtn"),
+      nextMonthBtn: document.getElementById("nextMonthBtn"),
+      currentMonthBtn: document.getElementById("currentMonthBtn"),
+      tabs: document.querySelectorAll(".tab"),
+      panels: document.querySelectorAll(".tab-panel"),
+      notice: document.getElementById("notice"),
+
+      totalBudgeted: document.getElementById("totalBudgeted"),
+      totalSpent: document.getElementById("totalSpent"),
+      totalRemaining: document.getElementById("totalRemaining"),
+      dashboardBudgetList: document.getElementById("dashboardBudgetList"),
+      duplicateTagWarning: document.getElementById("duplicateTagWarning"),
+
+      budgetForm: document.getElementById("budgetForm"),
+      budgetFormTitle: document.getElementById("budgetFormTitle"),
+      budgetId: document.getElementById("budgetId"),
+      budgetName: document.getElementById("budgetName"),
+      budgetAmount: document.getElementById("budgetAmount"),
+      budgetTag: document.getElementById("budgetTag"),
+      budgetType: document.getElementById("budgetType"),
+      budgetList: document.getElementById("budgetList"),
+      cancelBudgetEditBtn: document.getElementById("cancelBudgetEditBtn"),
+      budgetTagOptions: document.getElementById("budgetTagOptions"),
+
+      purchaseForm: document.getElementById("purchaseForm"),
+      purchaseFormTitle: document.getElementById("purchaseFormTitle"),
+      purchaseId: document.getElementById("purchaseId"),
+      purchaseName: document.getElementById("purchaseName"),
+      purchaseAmount: document.getElementById("purchaseAmount"),
+      purchaseTag: document.getElementById("purchaseTag"),
+      purchasePaymentMethod: document.getElementById("purchasePaymentMethod"),
+      purchaseDate: document.getElementById("purchaseDate"),
+      purchaseList: document.getElementById("purchaseList"),
+      cancelPurchaseEditBtn: document.getElementById("cancelPurchaseEditBtn"),
+      purchaseTagOptions: document.getElementById("purchaseTagOptions"),
+
+      paymentForm: document.getElementById("paymentForm"),
+      paymentFormTitle: document.getElementById("paymentFormTitle"),
+      paymentMethodId: document.getElementById("paymentMethodId"),
+      paymentMethodName: document.getElementById("paymentMethodName"),
+      paymentMethodType: document.getElementById("paymentMethodType"),
+      paymentMethodList: document.getElementById("paymentMethodList"),
+      cancelPaymentEditBtn: document.getElementById("cancelPaymentEditBtn"),
+
+      exportBtn: document.getElementById("exportBtn"),
+      importBtn: document.getElementById("importBtn"),
+      importFile: document.getElementById("importFile"),
+      resetBtn: document.getElementById("resetBtn")
+    };
+
+    init();
+
+    function init() {
+      loadData();
+      setupEventListeners();
+      setDefaultPurchaseDate();
+      renderAll();
+    }
+
+    function setupEventListeners() {
+      els.prevMonthBtn.addEventListener("click", () => changeMonth(-1));
+      els.nextMonthBtn.addEventListener("click", () => changeMonth(1));
+      els.currentMonthBtn.addEventListener("click", () => {
+        state.selectedMonth = getCurrentMonth();
+        renderAll();
+      });
+
+      els.tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          state.activeTab = tab.dataset.tab;
+          renderTabs();
+        });
+      });
+
+      els.budgetForm.addEventListener("submit", handleBudgetSubmit);
+      els.cancelBudgetEditBtn.addEventListener("click", resetBudgetForm);
+
+      els.purchaseForm.addEventListener("submit", handlePurchaseSubmit);
+      els.cancelPurchaseEditBtn.addEventListener("click", resetPurchaseForm);
+
+      els.paymentForm.addEventListener("submit", handlePaymentSubmit);
+      els.cancelPaymentEditBtn.addEventListener("click", resetPaymentForm);
+
+      els.exportBtn.addEventListener("click", exportData);
+      els.importBtn.addEventListener("click", importData);
+      els.resetBtn.addEventListener("click", resetAllData);
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+
+        const parsed = JSON.parse(raw);
+        if (isValidDataShape(parsed)) {
+          state.data = parsed;
+        }
+      } catch {
+        showNotice("Could not load saved data. Starting with a blank tracker.", "error");
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    }
+
+    function renderAll() {
+      renderMonthLabel();
+      renderTabs();
+      renderDatalists();
+      renderPaymentMethodOptions();
+      renderDashboard();
+      renderBudgets();
+      renderPurchases();
+      renderPaymentMethods();
+    }
+
+    function renderTabs() {
+      els.tabs.forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.tab === state.activeTab);
+      });
+
+      els.panels.forEach(panel => {
+        panel.classList.toggle("active", panel.id === state.activeTab);
+      });
+    }
+
+    function renderMonthLabel() {
+      els.selectedMonthLabel.textContent = formatMonthLabel(state.selectedMonth);
+    }
+
+    function renderDashboard() {
+      const budgets = getBudgetsForSelectedMonth();
+      const purchases = getPurchasesForSelectedMonth();
+
+      let totalBudgeted = 0;
+      let totalSpent = 0;
+
+      const duplicateTags = getDuplicateBudgetTags(budgets);
+      if (duplicateTags.length) {
+        els.duplicateTagWarning.textContent =
+          "Warning: Multiple budgets in this month use the same tag: " +
+          duplicateTags.join(", ") +
+          ". Purchases with those tags may count against multiple budgets.";
+        els.duplicateTagWarning.classList.add("show");
+      } else {
+        els.duplicateTagWarning.classList.remove("show");
+      }
+
+      if (!budgets.length) {
+        els.dashboardBudgetList.innerHTML = `
+          <div class="empty">
+            No budgets yet for this month. Add a recurring or one-time budget in the Budgets tab.
+          </div>
+        `;
+      } else {
+        els.dashboardBudgetList.innerHTML = budgets.map(budget => {
+          const spent = getSpentForBudget(budget, purchases);
+          const remaining = Number(budget.amount) - spent;
+          const percent = Number(budget.amount) > 0 ? (spent / Number(budget.amount)) * 100 : 0;
+          const status = getBudgetStatus(percent);
+
+          totalBudgeted += Number(budget.amount);
+          totalSpent += spent;
+
+          return `
+            <article class="budget-card">
+              <div class="budget-head">
+                <div>
+                  <div class="budget-name">${escapeHtml(budget.name)}</div>
+                  <span class="tag">${escapeHtml(budget.tag)}</span>
+                  <div class="muted small" style="margin-top: 7px;">
+                    ${budget.type === "recurring" ? "Recurring monthly" : "One-time budget"} · Created ${budget.monthCreated}
+                  </div>
+                </div>
+                <span class="status ${status.className}">${status.label}</span>
+              </div>
+
+              <div class="progress-wrap" aria-label="Budget progress">
+                <div class="progress-bar ${status.className}" style="width: ${Math.min(percent, 100)}%;"></div>
+              </div>
+
+              <div class="stats">
+                <div class="stat">
+                  <div class="label">Budget</div>
+                  <div class="value">${formatCurrency(budget.amount)}</div>
+                </div>
+                <div class="stat">
+                  <div class="label">Spent</div>
+                  <div class="value">${formatCurrency(spent)}</div>
+                </div>
+                <div class="stat">
+                  <div class="label">Remaining</div>
+                  <div class="value">${formatCurrency(remaining)}</div>
+                </div>
+                <div class="stat">
+                  <div class="label">Used</div>
+                  <div class="value">${formatPercent(percent)}</div>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      if (!budgets.length) {
+        totalBudgeted = 0;
+        totalSpent = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      }
+
+      els.totalBudgeted.textContent = formatCurrency(totalBudgeted);
+      els.totalSpent.textContent = formatCurrency(totalSpent);
+      els.totalRemaining.textContent = formatCurrency(totalBudgeted - totalSpent);
+    }
+
+    function renderBudgets() {
+      const budgets = getBudgetsForSelectedMonth();
+
+      if (!budgets.length) {
+        els.budgetList.innerHTML = `
+          <div class="empty">No budgets yet for this month.</div>
+        `;
+        return;
+      }
+
+      els.budgetList.innerHTML = budgets.map(budget => `
+        <div class="list-item">
+          <div>
+            <div class="item-title">${escapeHtml(budget.name)}</div>
+            <div class="item-meta">
+              Amount: ${formatCurrency(budget.amount)}<br>
+              Tag: ${escapeHtml(budget.tag)}<br>
+              Type: ${budget.type === "recurring" ? "Recurring monthly" : "One-time for selected month"}<br>
+              Created: ${budget.monthCreated}
+            </div>
+          </div>
+          <div class="row-actions">
+            <button type="button" class="ghost" onclick="editBudget('${budget.id}')">Edit</button>
+            <button type="button" class="danger" onclick="deleteBudget('${budget.id}')">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderPurchases() {
+      const purchases = getPurchasesForSelectedMonth()
+        .slice()
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      if (!purchases.length) {
+        els.purchaseList.innerHTML = `
+          <div class="empty">No purchases yet for this month.</div>
+        `;
+        return;
+      }
+
+      els.purchaseList.innerHTML = purchases.map(purchase => {
+        const payment = getPaymentMethodById(purchase.paymentMethodId);
+        return `
+          <div class="list-item">
+            <div>
+              <div class="item-title">${escapeHtml(purchase.name)}</div>
+              <div class="item-meta">
+                Date: ${purchase.date}<br>
+                Tag: ${escapeHtml(purchase.tag)}<br>
+                Payment method: ${payment ? escapeHtml(payment.name) : "Deleted payment method"}
+              </div>
+            </div>
+            <div>
+              <div class="item-amount">${formatCurrency(purchase.amount)}</div>
+              <div class="row-actions" style="margin-top: 10px;">
+                <button type="button" class="ghost" onclick="editPurchase('${purchase.id}')">Edit</button>
+                <button type="button" class="danger" onclick="deletePurchase('${purchase.id}')">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderPaymentMethods() {
+      const methods = state.data.paymentMethods;
+
+      if (!methods.length) {
+        els.paymentMethodList.innerHTML = `
+          <div class="empty">No payment methods yet. Add one before entering purchases.</div>
+        `;
+        return;
+      }
+
+      els.paymentMethodList.innerHTML = methods.map(method => {
+        const useCount = state.data.purchases.filter(p => p.paymentMethodId === method.id).length;
+
+        return `
+          <div class="list-item">
+            <div>
+              <div class="item-title">${escapeHtml(method.name)}</div>
+              <div class="item-meta">
+                Type: ${escapeHtml(method.type || "Other")}<br>
+                Purchases using this method: ${useCount}
+              </div>
+            </div>
+            <div class="row-actions">
+              <button type="button" class="ghost" onclick="editPaymentMethod('${method.id}')">Edit</button>
+              <button type="button" class="danger" onclick="deletePaymentMethod('${method.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderDatalists() {
+      const tags = getAllBudgetTags();
+      const options = tags.map(tag => `<option value="${escapeHtml(tag)}"></option>`).join("");
+
+      els.budgetTagOptions.innerHTML = options;
+      els.purchaseTagOptions.innerHTML = options;
+    }
+
+    function renderPaymentMethodOptions() {
+      if (!state.data.paymentMethods.length) {
+        els.purchasePaymentMethod.innerHTML = `<option value="">Add a payment method first</option>`;
+        els.purchasePaymentMethod.disabled = true;
+        return;
+      }
+
+      els.purchasePaymentMethod.disabled = false;
+      els.purchasePaymentMethod.innerHTML = `
+        <option value="">Select a payment method</option>
+        ${state.data.paymentMethods.map(method => `
+          <option value="${method.id}">${escapeHtml(method.name)}${method.type ? " · " + escapeHtml(method.type) : ""}</option>
+        `).join("")}
+      `;
+    }
+
+    function handleBudgetSubmit(event) {
+      event.preventDefault();
+
+      const id = els.budgetId.value;
+      const name = els.budgetName.value.trim();
+      const amount = Number(els.budgetAmount.value);
+      const tag = els.budgetTag.value.trim();
+      const type = els.budgetType.value;
+
+      if (!name) return showNotice("Budget name is required.", "error");
+      if (!tag) return showNotice("Budget tag is required.", "error");
+      if (!Number.isFinite(amount) || amount <= 0) return showNotice("Budget amount must be greater than 0.", "error");
+      if (!["recurring", "one-time"].includes(type)) return showNotice("Budget type is invalid.", "error");
+
+      if (id) {
+        const budget = state.data.budgets.find(b => b.id === id);
+        if (!budget) return showNotice("Budget not found.", "error");
+
+        budget.name = name;
+        budget.amount = roundMoney(amount);
+        budget.tag = tag;
+        budget.type = type;
+      } else {
+        state.data.budgets.push({
+          id: createId(),
+          name,
+          amount: roundMoney(amount),
+          tag,
+          type,
+          monthCreated: state.selectedMonth
+        });
+      }
+
+      saveData();
+      resetBudgetForm();
+      renderAll();
+      showNotice(id ? "Budget updated." : "Budget added.", "success");
+    }
+
+    function editBudget(id) {
+      const budget = state.data.budgets.find(b => b.id === id);
+      if (!budget) return;
+
+      state.activeTab = "budgets";
+      els.budgetFormTitle.textContent = "Edit Budget";
+      els.budgetId.value = budget.id;
+      els.budgetName.value = budget.name;
+      els.budgetAmount.value = budget.amount;
+      els.budgetTag.value = budget.tag;
+      els.budgetType.value = budget.type;
+      els.cancelBudgetEditBtn.classList.remove("hidden");
+      renderTabs();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteBudget(id) {
+      const budget = state.data.budgets.find(b => b.id === id);
+      if (!budget) return;
+
+      const confirmed = confirm(`Delete the budget "${budget.name}"? Purchases will not be deleted.`);
+      if (!confirmed) return;
+
+      state.data.budgets = state.data.budgets.filter(b => b.id !== id);
+      saveData();
+      resetBudgetForm();
+      renderAll();
+      showNotice("Budget deleted.", "success");
+    }
+
+    function resetBudgetForm() {
+      els.budgetForm.reset();
+      els.budgetId.value = "";
+      els.budgetType.value = "recurring";
+      els.budgetFormTitle.textContent = "Add Budget";
+      els.cancelBudgetEditBtn.classList.add("hidden");
+    }
+
+    function handlePurchaseSubmit(event) {
+      event.preventDefault();
+
+      const id = els.purchaseId.value;
+      const name = els.purchaseName.value.trim();
+      const amount = Number(els.purchaseAmount.value);
+      const tag = els.purchaseTag.value.trim();
+      const paymentMethodId = els.purchasePaymentMethod.value;
+      const date = els.purchaseDate.value;
+
+      if (!name) return showNotice("Purchase name is required.", "error");
+      if (!Number.isFinite(amount) || amount <= 0) return showNotice("Purchase amount must be greater than 0.", "error");
+      if (!tag) return showNotice("Purchase tag is required.", "error");
+      if (!paymentMethodId) return showNotice("Payment method is required.", "error");
+      if (!getPaymentMethodById(paymentMethodId)) return showNotice("Selected payment method is invalid.", "error");
+      if (!isValidDate(date)) return showNotice("Purchase date is invalid.", "error");
+
+      if (id) {
+        const purchase = state.data.purchases.find(p => p.id === id);
+        if (!purchase) return showNotice("Purchase not found.", "error");
+
+        purchase.name = name;
+        purchase.amount = roundMoney(amount);
+        purchase.tag = tag;
+        purchase.paymentMethodId = paymentMethodId;
+        purchase.date = date;
+      } else {
+        state.data.purchases.push({
+          id: createId(),
+          name,
+          amount: roundMoney(amount),
+          tag,
+          paymentMethodId,
+          date
+        });
+      }
+
+      saveData();
+      resetPurchaseForm();
+      renderAll();
+      showNotice(id ? "Purchase updated." : "Purchase added.", "success");
+    }
+
+    function editPurchase(id) {
+      const purchase = state.data.purchases.find(p => p.id === id);
+      if (!purchase) return;
+
+      state.activeTab = "purchases";
+      renderPaymentMethodOptions();
+
+      els.purchaseFormTitle.textContent = "Edit Purchase";
+      els.purchaseId.value = purchase.id;
+      els.purchaseName.value = purchase.name;
+      els.purchaseAmount.value = purchase.amount;
+      els.purchaseTag.value = purchase.tag;
+      els.purchasePaymentMethod.value = purchase.paymentMethodId;
+      els.purchaseDate.value = purchase.date;
+      els.cancelPurchaseEditBtn.classList.remove("hidden");
+      renderTabs();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deletePurchase(id) {
+      const purchase = state.data.purchases.find(p => p.id === id);
+      if (!purchase) return;
+
+      const confirmed = confirm(`Delete the purchase "${purchase.name}"?`);
+      if (!confirmed) return;
+
+      state.data.purchases = state.data.purchases.filter(p => p.id !== id);
+      saveData();
+      resetPurchaseForm();
+      renderAll();
+      showNotice("Purchase deleted.", "success");
+    }
+
+    function resetPurchaseForm() {
+      els.purchaseForm.reset();
+      els.purchaseId.value = "";
+      els.purchaseFormTitle.textContent = "Add Purchase";
+      els.cancelPurchaseEditBtn.classList.add("hidden");
+      renderPaymentMethodOptions();
+      setDefaultPurchaseDate();
+    }
+
+    function handlePaymentSubmit(event) {
+      event.preventDefault();
+
+      const id = els.paymentMethodId.value;
+      const name = els.paymentMethodName.value.trim();
+      const type = els.paymentMethodType.value;
+
+      if (!name) return showNotice("Payment method name is required.", "error");
+
+      if (id) {
+        const method = state.data.paymentMethods.find(m => m.id === id);
+        if (!method) return showNotice("Payment method not found.", "error");
+
+        method.name = name;
+        method.type = type;
+      } else {
+        state.data.paymentMethods.push({
+          id: createId(),
+          name,
+          type
+        });
+      }
+
+      saveData();
+      resetPaymentForm();
+      renderAll();
+      showNotice(id ? "Payment method updated." : "Payment method added.", "success");
+    }
+
+    function editPaymentMethod(id) {
+      const method = state.data.paymentMethods.find(m => m.id === id);
+      if (!method) return;
+
+      state.activeTab = "paymentMethods";
+      els.paymentFormTitle.textContent = "Edit Payment Method";
+      els.paymentMethodId.value = method.id;
+      els.paymentMethodName.value = method.name;
+      els.paymentMethodType.value = method.type || "";
+      els.cancelPaymentEditBtn.classList.remove("hidden");
+      renderTabs();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deletePaymentMethod(id) {
+      const method = state.data.paymentMethods.find(m => m.id === id);
+      if (!method) return;
+
+      const tiedPurchases = state.data.purchases.filter(p => p.paymentMethodId === id).length;
+
+      let message = `Delete the payment method "${method.name}"?`;
+      if (tiedPurchases > 0) {
+        message += `\n\nWarning: ${tiedPurchases} purchase(s) are tied to this payment method. They will remain, but will show as using a deleted payment method.`;
+      }
+
+      const confirmed = confirm(message);
+      if (!confirmed) return;
+
+      state.data.paymentMethods = state.data.paymentMethods.filter(m => m.id !== id);
+      saveData();
+      resetPaymentForm();
+      renderAll();
+      showNotice("Payment method deleted.", "success");
+    }
+
+    function resetPaymentForm() {
+      els.paymentForm.reset();
+      els.paymentMethodId.value = "";
+      els.paymentFormTitle.textContent = "Add Payment Method";
+      els.cancelPaymentEditBtn.classList.add("hidden");
+    }
+
+    function exportData() {
+      const exportPayload = {
+        app: "Monthly Budget Tracker",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        data: state.data
+      };
+
+      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
+        type: "application/json"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `monthly-budget-tracker-${getCurrentMonth()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      showNotice("Data exported.", "success");
+    }
+
+    function importData() {
+      const file = els.importFile.files[0];
+
+      if (!file) {
+        showNotice("Choose a JSON file to import.", "error");
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const importedData = parsed.data && isValidDataShape(parsed.data) ? parsed.data : parsed;
+
+          if (!isValidDataShape(importedData)) {
+            showNotice("Invalid import file. Expected budgets, purchases, and paymentMethods arrays.", "error");
+            return;
+          }
+
+          const confirmed = confirm(
+            "Importing will replace all current data in this browser. Continue?"
+          );
+
+          if (!confirmed) return;
+
+          state.data = normalizeImportedData(importedData);
+          saveData();
+          resetBudgetForm();
+          resetPurchaseForm();
+          resetPaymentForm();
+          els.importFile.value = "";
+          renderAll();
+          showNotice("Data imported successfully.", "success");
+        } catch {
+          showNotice("Could not read that JSON file.", "error");
+        }
+      };
+
+      reader.readAsText(file);
+    }
+
+    function resetAllData() {
+      const confirmed = confirm(
+        "Reset all data? This permanently deletes all budgets, purchases, and payment methods stored in this browser."
+      );
+
+      if (!confirmed) return;
+
+      state.data = {
+        budgets: [],
+        purchases: [],
+        paymentMethods: []
+      };
+
+      saveData();
+      resetBudgetForm();
+      resetPurchaseForm();
+      resetPaymentForm();
+      renderAll();
+      showNotice("All data has been reset.", "success");
+    }
+
+    function changeMonth(delta) {
+      const [year, month] = state.selectedMonth.split("-").map(Number);
+      const date = new Date(year, month - 1 + delta, 1);
+      state.selectedMonth = toYearMonth(date);
+      renderAll();
+    }
+
+    function getBudgetsForSelectedMonth() {
+      return state.data.budgets.filter(budget => {
+        return budget.type === "recurring" || budget.monthCreated === state.selectedMonth;
+      });
+    }
+
+    function getPurchasesForSelectedMonth() {
+      return state.data.purchases.filter(purchase => {
+        return purchase.date.slice(0, 7) === state.selectedMonth;
+      });
+    }
+
+    function getSpentForBudget(budget, purchases) {
+      const budgetTag = normalizeTag(budget.tag);
+
+      return purchases.reduce((sum, purchase) => {
+        return normalizeTag(purchase.tag) === budgetTag
+          ? sum + Number(purchase.amount)
+          : sum;
+      }, 0);
+    }
+
+    function getBudgetStatus(percent) {
+      if (percent > 100) {
+        return {
+          label: "Over budget",
+          className: "danger"
+        };
+      }
+
+      if (percent >= 75) {
+        return {
+          label: "Near limit",
+          className: "warning"
+        };
+      }
+
+      return {
+        label: "On track",
+        className: "good"
+      };
+    }
+
+    function getDuplicateBudgetTags(budgets) {
+      const counts = new Map();
+
+      budgets.forEach(budget => {
+        const normalized = normalizeTag(budget.tag);
+        counts.set(normalized, (counts.get(normalized) || 0) + 1);
+      });
+
+      const duplicates = [];
+
+      counts.forEach((count, normalizedTag) => {
+        if (count > 1) {
+          const original = budgets.find(b => normalizeTag(b.tag) === normalizedTag)?.tag || normalizedTag;
+          duplicates.push(original);
+        }
+      });
+
+      return duplicates;
+    }
+
+    function getAllBudgetTags() {
+      const map = new Map();
+
+      state.data.budgets.forEach(budget => {
+        const normalized = normalizeTag(budget.tag);
+        if (!map.has(normalized)) map.set(normalized, budget.tag);
+      });
+
+      return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
+    }
+
+    function getPaymentMethodById(id) {
+      return state.data.paymentMethods.find(method => method.id === id);
+    }
+
+    function isValidDataShape(value) {
+      if (!value || typeof value !== "object") return false;
+      if (!Array.isArray(value.budgets)) return false;
+      if (!Array.isArray(value.purchases)) return false;
+      if (!Array.isArray(value.paymentMethods)) return false;
+
+      const budgetsValid = value.budgets.every(budget => {
+        return typeof budget.id === "string" &&
+          typeof budget.name === "string" &&
+          Number.isFinite(Number(budget.amount)) &&
+          typeof budget.tag === "string" &&
+          ["recurring", "one-time"].includes(budget.type) &&
+          typeof budget.monthCreated === "string" &&
+          /^\d{4}-\d{2}$/.test(budget.monthCreated);
+      });
+
+      const purchasesValid = value.purchases.every(purchase => {
+        return typeof purchase.id === "string" &&
+          typeof purchase.name === "string" &&
+          Number.isFinite(Number(purchase.amount)) &&
+          typeof purchase.tag === "string" &&
+          typeof purchase.paymentMethodId === "string" &&
+          typeof purchase.date === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(purchase.date);
+      });
+
+      const paymentMethodsValid = value.paymentMethods.every(method => {
+        return typeof method.id === "string" &&
+          typeof method.name === "string" &&
+          typeof method.type === "string";
+      });
+
+      return budgetsValid && purchasesValid && paymentMethodsValid;
+    }
+
+    function normalizeImportedData(data) {
+      return {
+        budgets: data.budgets.map(budget => ({
+          id: String(budget.id),
+          name: String(budget.name).trim(),
+          amount: roundMoney(Number(budget.amount)),
+          tag: String(budget.tag).trim(),
+          type: budget.type,
+          monthCreated: budget.monthCreated
+        })),
+        purchases: data.purchases.map(purchase => ({
+          id: String(purchase.id),
+          name: String(purchase.name).trim(),
+          amount: roundMoney(Number(purchase.amount)),
+          tag: String(purchase.tag).trim(),
+          paymentMethodId: String(purchase.paymentMethodId),
+          date: purchase.date
+        })),
+        paymentMethods: data.paymentMethods.map(method => ({
+          id: String(method.id),
+          name: String(method.name).trim(),
+          type: String(method.type || "")
+        }))
+      };
+    }
+
+    function showNotice(message, type = "success") {
+      els.notice.textContent = message;
+      els.notice.className = `notice show ${type}`;
+
+      clearTimeout(showNotice.timeout);
+      showNotice.timeout = setTimeout(() => {
+        els.notice.classList.remove("show");
+      }, 3500);
+    }
+
+    function setDefaultPurchaseDate() {
+      els.purchaseDate.value = toDateInputValue(new Date());
+    }
+
+    function getCurrentMonth() {
+      return toYearMonth(new Date());
+    }
+
+    function toYearMonth(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      return `${year}-${month}`;
+    }
+
+    function toDateInputValue(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatMonthLabel(yearMonth) {
+      const [year, month] = yearMonth.split("-").map(Number);
+      const date = new Date(year, month - 1, 1);
+
+      return date.toLocaleDateString(undefined, {
+        month: "long",
+        year: "numeric"
+      });
+    }
+
+    function formatCurrency(value) {
+      return currencyFormatter.format(Number(value) || 0);
+    }
+
+    function formatPercent(value) {
+      if (!Number.isFinite(value)) return "0%";
+      return `${Math.round(value)}%`;
+    }
+
+    function normalizeTag(tag) {
+      return String(tag || "").trim().toLowerCase();
+    }
+
+    function roundMoney(value) {
+      return Math.round(Number(value) * 100) / 100;
+    }
+
+    function isValidDate(value) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+      const date = new Date(value + "T00:00:00");
+      return !Number.isNaN(date.getTime()) && toDateInputValue(date) === value;
+    }
+
+    function createId() {
+      if (crypto && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+
+      return `id_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    window.editBudget = editBudget;
+    window.deleteBudget = deleteBudget;
+    window.editPurchase = editPurchase;
+    window.deletePurchase = deletePurchase;
+    window.editPaymentMethod = editPaymentMethod;
+    window.deletePaymentMethod = deletePaymentMethod;
+  </script>
+</body>
+</html>

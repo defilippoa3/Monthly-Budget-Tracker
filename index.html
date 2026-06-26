@@ -467,6 +467,17 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
     }
 
+
+    #billStartMonth {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      display: block;
+      box-sizing: border-box;
+      text-align: left;
+      text-align-last: left;
+    }
+
     .form-note {
       font-size: 0.86rem;
       color: var(--muted);
@@ -1015,6 +1026,15 @@
         padding: 11px 12px;
       }
 
+      #billStartMonth {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        padding: 11px 12px;
+      }
+
       .calendar-grid {
         gap: 5px;
       }
@@ -1245,7 +1265,7 @@
               <input id="billDay" type="number" min="1" max="31" step="1" placeholder="15" />
 
               <label for="billStartMonth">Starting month</label>
-              <input id="billStartMonth" type="month" />
+              <select id="billStartMonth"></select>
 
               <p class="form-note">For recurring bills, choose the day of the month and the first month it should count. It will be included from that month onward, not before.</p>
             </div>
@@ -1807,6 +1827,7 @@
       renderTabs();
       renderDatalists();
       renderPaymentMethodOptions();
+      populateBillStartMonthOptions();
       renderBillPaymentMethodOptions();
       renderDashboard();
       renderBudgets();
@@ -2704,6 +2725,7 @@
       els.billPaymentMethod.value = bill.paymentMethodId || "";
       els.billType.value = bill.type;
       els.billDay.value = bill.day || Number(bill.date.slice(8, 10));
+      populateBillStartMonthOptions(bill.date.slice(0, 7));
       els.billStartMonth.value = bill.date.slice(0, 7);
       els.billDate.value = bill.date;
       els.cancelBillEditBtn.classList.remove("hidden");
@@ -3239,6 +3261,33 @@
       }, 3500);
     }
 
+    function populateBillStartMonthOptions(selectedValue = els.billStartMonth.value || state.selectedMonth) {
+      const selectedYear = Number(state.selectedMonth.slice(0, 4));
+      const values = new Set();
+
+      for (let year = selectedYear - 5; year <= selectedYear + 5; year += 1) {
+        for (let month = 1; month <= 12; month += 1) {
+          values.add(`${year}-${String(month).padStart(2, "0")}`);
+        }
+      }
+
+      if (selectedValue && /^\d{4}-\d{2}$/.test(selectedValue)) {
+        values.add(selectedValue);
+      }
+
+      const sortedValues = Array.from(values).sort();
+
+      els.billStartMonth.innerHTML = sortedValues
+        .map(value => `<option value="${value}">${formatMonthLabel(value)}</option>`)
+        .join("");
+
+      els.billStartMonth.value = selectedValue;
+
+      if (!els.billStartMonth.value) {
+        els.billStartMonth.value = state.selectedMonth;
+      }
+    }
+
     function setDefaultPurchaseDate() {
       els.purchaseDate.value = toDateInputValue(new Date());
     }
@@ -3246,6 +3295,7 @@
     function setDefaultBillInputs() {
       const today = new Date();
       els.billDay.value = String(today.getDate());
+      populateBillStartMonthOptions(state.selectedMonth);
       els.billStartMonth.value = state.selectedMonth;
       els.billDate.value = toDateInputValue(today);
       syncBillTypeFields();

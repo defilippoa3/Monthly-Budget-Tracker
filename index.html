@@ -478,6 +478,36 @@
       text-align-last: left;
     }
 
+    .split-entry-option {
+      margin-top: 12px;
+    }
+
+    .checkbox-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0;
+      font-weight: 900;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .checkbox-row input {
+      width: auto;
+      min-width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--primary);
+    }
+
+    .split-fields {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #f8fafc;
+    }
+
     .form-note {
       font-size: 0.86rem;
       color: var(--muted);
@@ -1135,11 +1165,11 @@
             <div class="value" id="billsExpensesTotal">$0.00</div>
           </div>
           <div class="summary-mini">
-            <div class="label">Total budgeted</div>
+            <div class="label">Total Budgeted</div>
             <div class="value" id="totalBudgeted">$0.00</div>
           </div>
           <div class="summary-mini">
-            <div class="label">Total budget remaining</div>
+            <div class="label">Total Remaining</div>
             <div class="value" id="totalRemaining">$0.00</div>
           </div>
         </div>
@@ -1307,6 +1337,26 @@
             <label for="purchaseTag">Budget tag</label>
             <select id="purchaseTag"></select>
             <p class="form-note">Choose an existing budget tag for the purchase date. Yellow purchases become normal after you choose an active budget tag and active MOP, then save.</p>
+
+            <div class="split-entry-option">
+              <label class="checkbox-row" for="purchaseSplitToggle">
+                <input id="purchaseSplitToggle" type="checkbox" />
+                <span>Split Entry</span>
+              </label>
+            </div>
+
+            <div id="purchaseSplitFields" class="split-fields hidden">
+              <label for="purchaseSplitAmountPrimary">Amount for selected budget tag</label>
+              <input id="purchaseSplitAmountPrimary" type="number" step="0.01" placeholder="Example: 40.00" />
+
+              <label for="purchaseSplitTag">Additional budget tag</label>
+              <select id="purchaseSplitTag"></select>
+
+              <label for="purchaseSplitAmountSecondary">Amount for additional budget tag</label>
+              <input id="purchaseSplitAmountSecondary" type="number" step="0.01" placeholder="Example: 60.00" />
+
+              <p class="form-note">The two split amounts must add up exactly to the purchase amount above.</p>
+            </div>
 
             <label for="purchasePaymentMethod">MOP used</label>
             <select id="purchasePaymentMethod"></select>
@@ -1535,6 +1585,11 @@
       purchaseName: document.getElementById("purchaseName"),
       purchaseAmount: document.getElementById("purchaseAmount"),
       purchaseTag: document.getElementById("purchaseTag"),
+      purchaseSplitToggle: document.getElementById("purchaseSplitToggle"),
+      purchaseSplitFields: document.getElementById("purchaseSplitFields"),
+      purchaseSplitAmountPrimary: document.getElementById("purchaseSplitAmountPrimary"),
+      purchaseSplitTag: document.getElementById("purchaseSplitTag"),
+      purchaseSplitAmountSecondary: document.getElementById("purchaseSplitAmountSecondary"),
       purchasePaymentMethod: document.getElementById("purchasePaymentMethod"),
       purchaseDate: document.getElementById("purchaseDate"),
       purchaseList: document.getElementById("purchaseList"),
@@ -1592,6 +1647,7 @@
       setupEventListeners();
       setDefaultPurchaseDate();
       setDefaultBillInputs();
+      syncPurchaseSplitFields();
       saveData();
       renderAll();
     }
@@ -1627,6 +1683,7 @@
       });
 
       els.purchaseDate.addEventListener("change", renderDatalists);
+      els.purchaseSplitToggle.addEventListener("change", syncPurchaseSplitFields);
       els.billType.addEventListener("change", syncBillTypeFields);
 
       els.budgetForm.addEventListener("submit", handleBudgetSubmit);
@@ -2451,6 +2508,7 @@
 
     function renderDatalists() {
       const currentPurchaseTag = els.purchaseTag ? els.purchaseTag.value : "";
+      const currentSplitTag = els.purchaseSplitTag ? els.purchaseSplitTag.value : "";
       const purchaseMonth = els.purchaseDate.value && isValidDate(els.purchaseDate.value)
         ? els.purchaseDate.value.slice(0, 7)
         : state.selectedMonth;
@@ -2459,6 +2517,9 @@
       const purchaseMonthTags = getBudgetTagsForMonth(purchaseMonth);
       const matchingCurrentPurchaseTag = currentPurchaseTag
         ? purchaseMonthTags.find(tag => normalizeTag(tag) === normalizeTag(currentPurchaseTag))
+        : "";
+      const matchingCurrentSplitTag = currentSplitTag
+        ? purchaseMonthTags.find(tag => normalizeTag(tag) === normalizeTag(currentSplitTag))
         : "";
 
       els.budgetTagOptions.innerHTML = selectedMonthTags
@@ -2474,12 +2535,20 @@
       if (!purchaseMonthTags.length) {
         els.purchaseTag.innerHTML = `<option value="">Add a budget tag first</option>`;
         els.purchaseTag.disabled = true;
+        els.purchaseSplitTag.innerHTML = `<option value="">Add a budget tag first</option>`;
+        els.purchaseSplitTag.disabled = true;
       } else {
+        const tagOptions = purchaseMonthTags
+          .map(tag => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`)
+          .join("");
+
         els.purchaseTag.disabled = false;
-        els.purchaseTag.innerHTML =
-          `<option value="">Select a budget tag</option>` +
-          purchaseMonthTags.map(tag => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`).join("");
+        els.purchaseTag.innerHTML = `<option value="">Select a budget tag</option>` + tagOptions;
         els.purchaseTag.value = matchingCurrentPurchaseTag || "";
+
+        els.purchaseSplitTag.disabled = false;
+        els.purchaseSplitTag.innerHTML = `<option value="">Select another budget tag</option>` + tagOptions;
+        els.purchaseSplitTag.value = matchingCurrentSplitTag || "";
       }
     }
 
@@ -2767,6 +2836,15 @@
       els.billOneTimeDateWrap.classList.toggle("hidden", isRecurring);
     }
 
+    function syncPurchaseSplitFields() {
+      const isSplit = els.purchaseSplitToggle.checked;
+      els.purchaseSplitFields.classList.toggle("hidden", !isSplit);
+
+      els.purchaseSplitAmountPrimary.required = isSplit;
+      els.purchaseSplitTag.required = isSplit;
+      els.purchaseSplitAmountSecondary.required = isSplit;
+    }
+
     function handlePurchaseSubmit(event) {
       event.preventDefault();
 
@@ -2776,6 +2854,7 @@
       const enteredTag = els.purchaseTag.value.trim();
       const paymentMethodId = els.purchasePaymentMethod.value;
       const date = els.purchaseDate.value;
+      const isSplit = els.purchaseSplitToggle.checked;
 
       if (!name) return showNotice("Purchase name is required.", "error");
 
@@ -2798,15 +2877,75 @@
         );
       }
 
+      let primaryAmount = roundMoney(amount);
+      let secondaryTag = "";
+      let secondaryAmount = 0;
+
+      if (isSplit) {
+        primaryAmount = roundMoney(Number(els.purchaseSplitAmountPrimary.value));
+        secondaryAmount = roundMoney(Number(els.purchaseSplitAmountSecondary.value));
+        const enteredSecondTag = els.purchaseSplitTag.value.trim();
+        secondaryTag = getMatchingBudgetTagForMonth(enteredSecondTag, purchaseMonth);
+
+        if (!Number.isFinite(primaryAmount) || primaryAmount === 0) {
+          return showNotice("Enter a valid amount for the selected budget tag.", "error");
+        }
+
+        if (!enteredSecondTag || !secondaryTag) {
+          return showNotice("Choose a valid additional budget tag for the split entry.", "error");
+        }
+
+        if (normalizeTag(secondaryTag) === normalizeTag(matchingTag)) {
+          return showNotice("Choose two different budget tags when splitting an entry.", "error");
+        }
+
+        if (!Number.isFinite(secondaryAmount) || secondaryAmount === 0) {
+          return showNotice("Enter a valid amount for the additional budget tag.", "error");
+        }
+
+        if (roundMoney(primaryAmount + secondaryAmount) !== roundMoney(amount)) {
+          return showNotice("The two split amounts must add up exactly to the purchase amount.", "error");
+        }
+      }
+
       if (id) {
         const purchase = state.data.purchases.find(p => p.id === id);
         if (!purchase) return showNotice("Purchase not found.", "error");
 
         purchase.name = name;
-        purchase.amount = roundMoney(amount);
+        purchase.amount = primaryAmount;
         purchase.tag = matchingTag;
         purchase.paymentMethodId = paymentMethodId;
         purchase.date = date;
+
+        if (isSplit) {
+          state.data.purchases.push({
+            id: createId(),
+            name,
+            amount: secondaryAmount,
+            tag: secondaryTag,
+            paymentMethodId,
+            date
+          });
+        }
+      } else if (isSplit) {
+        state.data.purchases.push({
+          id: createId(),
+          name,
+          amount: primaryAmount,
+          tag: matchingTag,
+          paymentMethodId,
+          date
+        });
+
+        state.data.purchases.push({
+          id: createId(),
+          name,
+          amount: secondaryAmount,
+          tag: secondaryTag,
+          paymentMethodId,
+          date
+        });
       } else {
         state.data.purchases.push({
           id: createId(),
@@ -2821,7 +2960,7 @@
       saveData();
       resetPurchaseForm();
       renderAll();
-      showNotice(id ? "Purchase updated." : "Purchase added.", "success");
+      showNotice(isSplit ? "Split purchase saved." : (id ? "Purchase updated." : "Purchase added."), "success");
     }
 
     function editPurchase(id) {
@@ -2831,6 +2970,8 @@
       state.activeTab = "purchases";
 
       els.purchaseFormTitle.textContent = "Edit Purchase";
+      els.purchaseSplitToggle.checked = false;
+      syncPurchaseSplitFields();
       els.purchaseId.value = purchase.id;
       els.purchaseName.value = purchase.name;
       els.purchaseAmount.value = purchase.amount;
@@ -2868,6 +3009,11 @@
       els.purchaseId.value = "";
       els.purchaseFormTitle.textContent = "Add Purchase";
       els.cancelPurchaseEditBtn.classList.add("hidden");
+      els.purchaseSplitToggle.checked = false;
+      els.purchaseSplitAmountPrimary.value = "";
+      els.purchaseSplitTag.value = "";
+      els.purchaseSplitAmountSecondary.value = "";
+      syncPurchaseSplitFields();
       setDefaultPurchaseDate();
       renderDatalists();
       renderPaymentMethodOptions();

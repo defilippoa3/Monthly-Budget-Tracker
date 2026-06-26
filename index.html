@@ -178,15 +178,16 @@
     }
 
     button.nav-main {
-      background: #f8fafc;
-      color: #374151;
+      background: #eef2ff;
+      color: #1e3a8a;
+      border-color: #dbeafe;
       font-weight: 900;
     }
 
     button.nav-main.open {
-      background: #eef2ff;
-      color: #1e3a8a;
-      border-color: #dbeafe;
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
     }
 
     button.tab.active {
@@ -506,6 +507,39 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       background: #f8fafc;
+    }
+
+    .split-symbol {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 22px;
+      margin-left: 7px;
+      vertical-align: -4px;
+      color: var(--primary);
+    }
+
+    .split-symbol svg {
+      width: 26px;
+      height: 22px;
+      display: block;
+    }
+
+    .split-remaining-note {
+      display: none;
+      margin-top: 7px;
+      padding: 9px 10px;
+      border-radius: 11px;
+      background: #eef2ff;
+      color: #1e3a8a;
+      font-weight: 850;
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .split-remaining-note.show {
+      display: block;
     }
 
     .form-note {
@@ -853,6 +887,17 @@
       justify-content: space-between;
       gap: 12px;
       align-items: center;
+    }
+
+    .mop-total-card.clickable {
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .mop-total-card.clickable:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
+      transform: translateY(-1px);
     }
 
     .mop-total-name,
@@ -1348,6 +1393,7 @@
             <div id="purchaseSplitFields" class="split-fields hidden">
               <label for="purchaseSplitAmountPrimary">Amount for selected budget tag</label>
               <input id="purchaseSplitAmountPrimary" type="number" step="0.01" placeholder="Example: 40.00" />
+              <div id="purchaseSplitRemainingSuggestion" class="split-remaining-note"></div>
 
               <label for="purchaseSplitTag">Additional budget tag</label>
               <select id="purchaseSplitTag"></select>
@@ -1398,7 +1444,9 @@
     <section id="yearTotal" class="tab-panel">
       <div class="card">
         <h2>Year Total for <span id="yearTotalYearLabel"></span></h2>
-        <p class="muted">Totals are calculated from purchases dated January through December for the selected year, grouped by budget tag.</p>
+        <p class="muted">Year Total shows actual spending through today. Projected Year Total includes future recurring bills/expenses.</p>
+
+        <div id="yearSummaryCards" class="list" style="margin-bottom: 16px;"></div>
 
         <div class="pie-wrap">
           <div id="yearPieChart" class="pie-chart"></div>
@@ -1588,6 +1636,7 @@
       purchaseSplitToggle: document.getElementById("purchaseSplitToggle"),
       purchaseSplitFields: document.getElementById("purchaseSplitFields"),
       purchaseSplitAmountPrimary: document.getElementById("purchaseSplitAmountPrimary"),
+      purchaseSplitRemainingSuggestion: document.getElementById("purchaseSplitRemainingSuggestion"),
       purchaseSplitTag: document.getElementById("purchaseSplitTag"),
       purchaseSplitAmountSecondary: document.getElementById("purchaseSplitAmountSecondary"),
       purchasePaymentMethod: document.getElementById("purchasePaymentMethod"),
@@ -1610,6 +1659,7 @@
       mopTotalsList: document.getElementById("mopTotalsList"),
 
       yearTotalYearLabel: document.getElementById("yearTotalYearLabel"),
+      yearSummaryCards: document.getElementById("yearSummaryCards"),
       yearPieChart: document.getElementById("yearPieChart"),
       yearTotalList: document.getElementById("yearTotalList"),
       monthTotalsToggle: document.getElementById("monthTotalsToggle"),
@@ -1684,6 +1734,8 @@
 
       els.purchaseDate.addEventListener("change", renderDatalists);
       els.purchaseSplitToggle.addEventListener("change", syncPurchaseSplitFields);
+      els.purchaseAmount.addEventListener("input", updateSplitRemainingSuggestion);
+      els.purchaseSplitAmountPrimary.addEventListener("input", updateSplitRemainingSuggestion);
       els.billType.addEventListener("change", syncBillTypeFields);
 
       els.budgetForm.addEventListener("submit", handleBudgetSubmit);
@@ -1835,11 +1887,9 @@
     }
 
     function getPurchasesTrackedByBudget(budget) {
-      const budgetTag = normalizeTag(budget.tag);
-
       return state.data.purchases.filter(purchase => {
         const purchaseMonth = purchase.date.slice(0, 7);
-        const tagMatches = normalizeTag(purchase.tag) === budgetTag;
+        const tagMatches = purchaseHasTag(purchase, budget.tag);
         const budgetAppliesToPurchaseMonth = budget.type === "recurring" || purchaseMonth === budget.monthCreated;
 
         return tagMatches && budgetAppliesToPurchaseMonth;
@@ -2095,17 +2145,23 @@
 
       els.purchaseList.innerHTML = purchases.map(purchase => {
         const payment = getPaymentMethodById(purchase.paymentMethodId);
-        const isUntrackedTag = normalizeTag(purchase.tag) === "untracked";
+        const split = getPurchaseSplits(purchase);
+        const isSplit = split.length > 1;
+        const hasUntrackedTag = split.some(part => normalizeTag(part.tag) === "untracked");
         const hasDeletedMop = !payment;
-        const needsAttention = isUntrackedTag || hasDeletedMop;
+        const needsAttention = hasUntrackedTag || hasDeletedMop;
         const reimbursementClass = Number(purchase.amount) < 0 ? " reimbursement" : "";
         const untrackedClass = needsAttention ? " untracked" : "";
+
+        const tagHtml = isSplit
+          ? split.map((part, index) => `<div><strong>Tag ${index + 1}:</strong> ${escapeHtml(part.tag)} · ${formatCurrency(part.amount)}</div>`).join("")
+          : `<div><strong>Tag:</strong> ${escapeHtml(purchase.tag)}</div>`;
 
         return `
           <details class="purchase-compact${reimbursementClass}${untrackedClass}" data-kind="purchase" data-id="${escapeHtml(purchase.id)}">
             <summary>
               <div>
-                <div class="purchase-summary-title">${escapeHtml(purchase.name)}</div>
+                <div class="purchase-summary-title">${escapeHtml(purchase.name)}${isSplit ? getSplitSymbolHtml() : ""}</div>
                 <div class="purchase-summary-date">${purchase.date}</div>
               </div>
               <div class="purchase-summary-amount">${formatCurrency(purchase.amount)}</div>
@@ -2113,9 +2169,9 @@
 
             <div class="purchase-expanded">
               <div class="purchase-expanded-grid">
-                <div><strong>Tag:</strong> ${escapeHtml(purchase.tag)}</div>
+                ${tagHtml}
                 <div><strong>MOP:</strong> ${payment ? escapeHtml(payment.name) : "Deleted MOP"}</div>
-                ${isUntrackedTag ? `<div><strong>Needs attention:</strong> Choose an active budget tag.</div>` : ""}
+                ${hasUntrackedTag ? `<div><strong>Needs attention:</strong> Choose active budget tag(s).</div>` : ""}
                 ${hasDeletedMop ? `<div><strong>Needs attention:</strong> Choose an active MOP.</div>` : ""}
                 ${Number(purchase.amount) < 0 ? `<div><strong>Type:</strong> Payback / refund / reimbursement</div>` : ""}
               </div>
@@ -2227,14 +2283,14 @@
           ${purchases.map(purchase => {
             const payment = getPaymentMethodById(purchase.paymentMethodId);
             const isReimbursement = Number(purchase.amount) < 0;
-            const needsAttention = normalizeTag(purchase.tag) === "untracked" || !payment;
+            const needsAttention = getPurchaseSplits(purchase).some(part => normalizeTag(part.tag) === "untracked") || !payment;
 
             return `
               <div class="list-item" ${needsAttention ? `style="background:#fef3c7;border-color:#facc15;"` : isReimbursement ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
                 <div>
-                  <div class="item-title">${escapeHtml(purchase.name)}</div>
+                  <div class="item-title">${escapeHtml(purchase.name)}${isSplitPurchase(purchase) ? getSplitSymbolHtml() : ""}</div>
                   <div class="item-meta">
-                    Tag: ${escapeHtml(purchase.tag)}<br>
+                    ${getPurchaseSplits(purchase).map((part, index) => `Tag ${index + 1}: ${escapeHtml(part.tag)} · ${formatCurrency(part.amount)}`).join("<br>")}<br>
                     MOP: ${payment ? escapeHtml(payment.name) : "Choose an active MOP"}
                   </div>
                 </div>
@@ -2340,10 +2396,10 @@
 
       els.mopTotalsList.innerHTML =
         rows.map(record => `
-          <div class="mop-total-card">
+          <div class="mop-total-card clickable" onclick="openMopDetails('${jsString(record.method.id)}')" title="Tap to see purchases and bills for this MOP">
             <div>
               <div class="mop-total-name">${escapeHtml(record.method.name)}</div>
-              <div class="item-meta">${escapeHtml(record.method.type || "Other")} · ${record.purchaseCount} purchase(s) · ${record.billCount} bill(s)</div>
+              <div class="item-meta">${escapeHtml(record.method.type || "Other")} · ${record.purchaseCount} purchase(s) · ${record.billCount} bill(s) · Tap to view details</div>
             </div>
             <div class="mop-total-amount">${formatCurrency(record.total)}</div>
           </div>
@@ -2370,51 +2426,78 @@
       const selectedYear = state.selectedMonth.slice(0, 4);
       els.yearTotalYearLabel.textContent = selectedYear;
 
-      const purchases = state.data.purchases.filter(purchase => purchase.date.slice(0, 4) === selectedYear);
-      const totals = new Map();
+      const today = new Date();
+      const currentYear = String(today.getFullYear());
+      const todayValue = toDateInputValue(today);
+      const cutoffDate = selectedYear < currentYear
+        ? `${selectedYear}-12-31`
+        : selectedYear > currentYear
+          ? `${selectedYear}-00-00`
+          : todayValue;
 
-      purchases.forEach(purchase => {
-        const key = normalizeTag(purchase.tag);
+      const cutoffLabel = selectedYear < currentYear
+        ? `December 31, ${selectedYear}`
+        : selectedYear > currentYear
+          ? `the start of ${selectedYear}`
+          : new Date(cutoffDate + "T00:00:00").toLocaleDateString(undefined, {
+              month: "long",
+              day: "numeric",
+              year: "numeric"
+            });
 
-        if (!totals.has(key)) {
-          totals.set(key, {
-            tag: purchase.tag,
-            total: 0,
-            count: 0,
-            kind: "purchase"
+      const allYearPurchases = state.data.purchases.filter(purchase => purchase.date.slice(0, 4) === selectedYear);
+      const actualPurchases = allYearPurchases.filter(purchase => purchase.date <= cutoffDate);
+      const allYearBills = getBillsForYear(selectedYear);
+      const actualBills = allYearBills.filter(bill => bill.effectiveDate <= cutoffDate);
+
+      function buildYearRows(purchases, bills) {
+        const totals = new Map();
+
+        purchases.forEach(purchase => {
+          getPurchaseSplits(purchase).forEach(part => {
+            const key = normalizeTag(part.tag);
+
+            if (!totals.has(key)) {
+              totals.set(key, {
+                tag: part.tag,
+                total: 0,
+                count: 0,
+                kind: "purchase"
+              });
+            }
+
+            const record = totals.get(key);
+            record.total += Number(part.amount);
+            record.count += 1;
+          });
+        });
+
+        const billsTotal = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+        const billsCount = bills.length;
+
+        if (billsCount > 0) {
+          totals.set("__bills_expenses__", {
+            tag: "Bills/Expenses",
+            total: billsTotal,
+            count: billsCount,
+            kind: "bill"
           });
         }
 
-        const record = totals.get(key);
-        record.total += Number(purchase.amount);
-        record.count += 1;
-      });
-
-      const billsTotal = getBillsForYear(selectedYear).reduce((sum, bill) => sum + Number(bill.amount), 0);
-      const billsCount = getBillsForYear(selectedYear).length;
-
-      if (billsCount > 0) {
-        totals.set("__bills_expenses__", {
-          tag: "Bills/Expenses",
-          total: billsTotal,
-          count: billsCount,
-          kind: "bill"
-        });
+        return Array.from(totals.values()).sort((a, b) => b.total - a.total);
       }
 
-      const rows = Array.from(totals.values()).sort((a, b) => b.total - a.total);
+      const rows = buildYearRows(actualPurchases, actualBills);
+      const projectedRows = buildYearRows(allYearPurchases, allYearBills);
       const grandTotal = rows.reduce((sum, row) => sum + row.total, 0);
+      const projectedGrandTotal = projectedRows.reduce((sum, row) => sum + row.total, 0);
 
       const positiveRows = rows.filter(row => row.total > 0);
       const positiveTotal = positiveRows.reduce((sum, row) => sum + row.total, 0);
 
       if (!rows.length) {
         els.yearPieChart.style.background = "conic-gradient(#e5e7eb 0deg 360deg)";
-        els.yearTotalList.innerHTML = `<div class="empty">No purchases or bills yet for ${selectedYear}.</div>`;
-        return;
-      }
-
-      if (!positiveRows.length) {
+      } else if (!positiveRows.length) {
         els.yearPieChart.style.background = "conic-gradient(#bbf7d0 0deg 360deg)";
       } else {
         let currentDegree = 0;
@@ -2430,32 +2513,44 @@
         els.yearPieChart.style.background = `conic-gradient(${segments.join(", ")})`;
       }
 
-      els.yearTotalList.innerHTML =
-        rows.map((row, index) => {
-          const percent = positiveTotal > 0 && row.total > 0 ? (row.total / positiveTotal) * 100 : 0;
-          const countLabel = row.kind === "bill" ? `${row.count} bill occurrence(s)` : `${row.count} purchase(s)`;
+      const rowHtml = rows.length
+        ? rows.map((row, index) => {
+            const percent = positiveTotal > 0 && row.total > 0 ? (row.total / positiveTotal) * 100 : 0;
+            const countLabel = row.kind === "bill" ? `${row.count} bill occurrence(s)` : `${row.count} purchase(s)`;
 
-          return `
-            <div class="year-total-card" ${row.total < 0 ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
-              <div>
-                <div class="legend-row">
-                  <span class="legend-color" style="background:${row.total < 0 ? "#bbf7d0" : PIE_COLORS[index % PIE_COLORS.length]}"></span>
-                  <span class="year-total-name">${escapeHtml(row.tag)}</span>
-                  <span>${row.total > 0 ? formatPercent(percent) : "Payback"}</span>
+            return `
+              <div class="year-total-card" ${row.total < 0 ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
+                <div>
+                  <div class="legend-row">
+                    <span class="legend-color" style="background:${row.total < 0 ? "#bbf7d0" : PIE_COLORS[index % PIE_COLORS.length]}"></span>
+                    <span class="year-total-name">${escapeHtml(row.tag)}</span>
+                    <span>${row.total > 0 ? formatPercent(percent) : "Payback"}</span>
+                  </div>
+                  <div class="item-meta">${countLabel}</div>
                 </div>
-                <div class="item-meta">${countLabel}</div>
+                <div class="year-total-amount">${formatCurrency(row.total)}</div>
               </div>
-              <div class="year-total-amount">${formatCurrency(row.total)}</div>
-            </div>
-          `;
-        }).join("") +
-        `<div class="year-total-card" style="background:#f8fafc;">
+            `;
+          }).join("")
+        : `<div class="empty">No purchases or bill occurrences counted through ${escapeHtml(cutoffLabel)}.</div>`;
+
+      els.yearSummaryCards.innerHTML =
+        `<div class="year-total-card" style="background:#eef2ff;border-color:#dbeafe;">
           <div>
             <div class="year-total-name">Year Total</div>
-            <div class="item-meta">Budget spending + Bills/Expenses</div>
+            <div class="item-meta">Actual spending through ${escapeHtml(cutoffLabel)} · Purchases + Bills/Expenses</div>
           </div>
           <div class="year-total-amount">${formatCurrency(grandTotal)}</div>
+        </div>
+        <div class="year-total-card" style="background:#eef2ff;border-color:#dbeafe;">
+          <div>
+            <div class="year-total-name">Projected Year Total</div>
+            <div class="item-meta">Full ${selectedYear} projection including future recurring Bills/Expenses</div>
+          </div>
+          <div class="year-total-amount">${formatCurrency(projectedGrandTotal)}</div>
         </div>`;
+
+      els.yearTotalList.innerHTML = rowHtml;
     }
 
     function renderMonthTotals() {
@@ -2496,14 +2591,7 @@
             </div>
             <div class="month-total-amount">${formatCurrency(month.total)}</div>
           </div>
-        `).join("") +
-        `<div class="month-total-card" style="background:#f8fafc;">
-          <div>
-            <div class="month-total-name">Calendar Year Total</div>
-            <div class="item-meta">January through December · Purchases + Bills/Expenses</div>
-          </div>
-          <div class="month-total-amount">${formatCurrency(yearlyTotal)}</div>
-        </div>`;
+        `).join("");
     }
 
     function renderDatalists() {
@@ -2582,15 +2670,106 @@
         `).join("");
     }
 
+    function openMopDetails(id) {
+      const method = state.data.paymentMethods.find(m => m.id === id);
+      if (!method) return showNotice("MOP not found.", "error");
+
+      const purchases = getPurchasesForSelectedMonth()
+        .filter(purchase => purchase.paymentMethodId === id)
+        .slice()
+        .sort((a, b) => b.date.localeCompare(a.date) || Number(b.amount) - Number(a.amount));
+
+      const bills = getBillsForSelectedMonth()
+        .filter(bill => bill.paymentMethodId === id)
+        .slice()
+        .sort((a, b) => getBillDateForSelectedMonth(a).localeCompare(getBillDateForSelectedMonth(b)) || Number(b.amount) - Number(a.amount));
+
+      const purchaseTotal = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      const billTotal = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+      const grandTotal = purchaseTotal + billTotal;
+
+      els.budgetModalTitle.textContent = method.name;
+      els.budgetModalSubtitle.textContent =
+        `${formatMonthLabel(state.selectedMonth)} · ${purchases.length} purchase(s) · ${bills.length} bill(s) · Total ${formatCurrency(grandTotal)}`;
+
+      if (!purchases.length && !bills.length) {
+        els.budgetModalContent.innerHTML = `<div class="empty">No purchases or bills used ${escapeHtml(method.name)} for this month.</div>`;
+      } else {
+        const purchaseHtml = purchases.length
+          ? `<h3>Purchases</h3>
+            <div class="list" style="margin-bottom: 16px;">
+              ${purchases.map(purchase => {
+                const split = getPurchaseSplits(purchase);
+                const isSplit = split.length > 1;
+                const hasUntrackedTag = split.some(part => normalizeTag(part.tag) === "untracked");
+                const isReimbursement = Number(purchase.amount) < 0;
+                const tagHtml = isSplit
+                  ? split.map((part, index) => `Tag ${index + 1}: ${escapeHtml(part.tag)} · ${formatCurrency(part.amount)}`).join("<br>")
+                  : `Tag: ${escapeHtml(purchase.tag)}`;
+
+                return `
+                  <div class="list-item" ${hasUntrackedTag ? `style="background:#fef3c7;border-color:#facc15;"` : isReimbursement ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
+                    <div>
+                      <div class="item-title">${escapeHtml(purchase.name)}${isSplit ? getSplitSymbolHtml() : ""}</div>
+                      <div class="item-meta">
+                        Date: ${purchase.date}<br>
+                        ${tagHtml}
+                      </div>
+                    </div>
+                    <div class="item-amount">${formatCurrency(purchase.amount)}</div>
+                  </div>
+                `;
+              }).join("")}
+            </div>`
+          : `<h3>Purchases</h3><div class="empty" style="margin-bottom: 16px;">No purchases for this MOP this month.</div>`;
+
+        const billHtml = bills.length
+          ? `<h3>Bills/Expenses</h3>
+            <div class="list">
+              ${bills.map(bill => `
+                <div class="list-item">
+                  <div>
+                    <div class="item-title">${escapeHtml(bill.title)}</div>
+                    <div class="item-meta">
+                      Pay date: ${getBillDateForSelectedMonth(bill)}<br>
+                      Type: ${bill.type === "recurring" ? "Recurring monthly" : "One-time"}
+                    </div>
+                  </div>
+                  <div class="item-amount">${formatCurrency(bill.amount)}</div>
+                </div>
+              `).join("")}
+            </div>`
+          : `<h3>Bills/Expenses</h3><div class="empty">No bills for this MOP this month.</div>`;
+
+        els.budgetModalContent.innerHTML = `
+          <div class="mop-total-card" style="background:#f8fafc;margin-bottom:16px;">
+            <div>
+              <div class="mop-total-name">MOP Total</div>
+              <div class="item-meta">Purchases ${formatCurrency(purchaseTotal)} + Bills/Expenses ${formatCurrency(billTotal)}</div>
+            </div>
+            <div class="mop-total-amount">${formatCurrency(grandTotal)}</div>
+          </div>
+          ${purchaseHtml}
+          ${billHtml}
+        `;
+      }
+
+      els.budgetModalBackdrop.classList.add("show");
+    }
+
     function openBudgetDetails(id) {
       const budget = state.data.budgets.find(b => b.id === id);
       if (!budget) return;
 
       const purchases = getPurchasesForSelectedMonth()
-        .filter(purchase => normalizeTag(purchase.tag) === normalizeTag(budget.tag))
-        .sort((a, b) => b.date.localeCompare(a.date));
+        .map(purchase => ({
+          purchase,
+          amountForBudget: getPurchaseAmountForTag(purchase, budget.tag)
+        }))
+        .filter(row => row.amountForBudget !== 0)
+        .sort((a, b) => b.purchase.date.localeCompare(a.purchase.date));
 
-      const spent = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      const spent = purchases.reduce((sum, row) => sum + Number(row.amountForBudget), 0);
       const remaining = Number(budget.amount) - spent;
 
       els.budgetModalTitle.textContent = budget.name;
@@ -2603,19 +2782,21 @@
       } else {
         els.budgetModalContent.innerHTML = `
           <div class="list">
-            ${purchases.map(purchase => {
+            ${purchases.map(row => {
+              const purchase = row.purchase;
               const payment = getPaymentMethodById(purchase.paymentMethodId);
 
               return `
-                <div class="list-item" ${Number(purchase.amount) < 0 ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
+                <div class="list-item" ${Number(row.amountForBudget) < 0 ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
                   <div>
-                    <div class="item-title">${escapeHtml(purchase.name)}</div>
+                    <div class="item-title">${escapeHtml(purchase.name)}${isSplitPurchase(purchase) ? getSplitSymbolHtml() : ""}</div>
                     <div class="item-meta">
                       Date: ${purchase.date}<br>
+                      ${isSplitPurchase(purchase) ? `Split purchase · Budget portion: ${formatCurrency(row.amountForBudget)}<br>` : ""}
                       MOP: ${payment ? escapeHtml(payment.name) : "Deleted MOP"}
                     </div>
                   </div>
-                  <div class="item-amount">${formatCurrency(purchase.amount)}</div>
+                  <div class="item-amount">${formatCurrency(row.amountForBudget)}</div>
                 </div>
               `;
             }).join("")}
@@ -2696,7 +2877,7 @@
 
       const affectedPurchases = getPurchasesTrackedByBudget(budget);
       affectedPurchases.forEach(purchase => {
-        purchase.tag = "untracked";
+        retagPurchaseBudgetTag(purchase, budget.tag, "untracked");
       });
 
       state.data.budgets = state.data.budgets.filter(item => item.id !== id);
@@ -2843,6 +3024,29 @@
       els.purchaseSplitAmountPrimary.required = isSplit;
       els.purchaseSplitTag.required = isSplit;
       els.purchaseSplitAmountSecondary.required = isSplit;
+      updateSplitRemainingSuggestion();
+    }
+
+    function updateSplitRemainingSuggestion() {
+      if (!els.purchaseSplitRemainingSuggestion) return;
+
+      const isSplit = els.purchaseSplitToggle.checked;
+      const totalAmount = Number(els.purchaseAmount.value);
+      const firstAmount = Number(els.purchaseSplitAmountPrimary.value);
+
+      if (!isSplit || !Number.isFinite(totalAmount) || totalAmount === 0 || !Number.isFinite(firstAmount)) {
+        els.purchaseSplitRemainingSuggestion.textContent = "";
+        els.purchaseSplitRemainingSuggestion.classList.remove("show");
+        els.purchaseSplitAmountSecondary.placeholder = "Example: 60.00";
+        return;
+      }
+
+      const remainingAmount = roundMoney(totalAmount - firstAmount);
+      const formattedRemaining = formatCurrency(remainingAmount);
+
+      els.purchaseSplitRemainingSuggestion.textContent = `Suggested amount for the second tag: ${formattedRemaining}`;
+      els.purchaseSplitRemainingSuggestion.classList.add("show");
+      els.purchaseSplitAmountSecondary.placeholder = `Suggested: ${formattedRemaining}`;
     }
 
     function handlePurchaseSubmit(event) {
@@ -2877,15 +3081,13 @@
         );
       }
 
-      let primaryAmount = roundMoney(amount);
-      let secondaryTag = "";
-      let secondaryAmount = 0;
+      let splits = null;
 
       if (isSplit) {
-        primaryAmount = roundMoney(Number(els.purchaseSplitAmountPrimary.value));
-        secondaryAmount = roundMoney(Number(els.purchaseSplitAmountSecondary.value));
+        const primaryAmount = roundMoney(Number(els.purchaseSplitAmountPrimary.value));
+        const secondaryAmount = roundMoney(Number(els.purchaseSplitAmountSecondary.value));
         const enteredSecondTag = els.purchaseSplitTag.value.trim();
-        secondaryTag = getMatchingBudgetTagForMonth(enteredSecondTag, purchaseMonth);
+        const secondaryTag = getMatchingBudgetTagForMonth(enteredSecondTag, purchaseMonth);
 
         if (!Number.isFinite(primaryAmount) || primaryAmount === 0) {
           return showNotice("Enter a valid amount for the selected budget tag.", "error");
@@ -2906,6 +3108,11 @@
         if (roundMoney(primaryAmount + secondaryAmount) !== roundMoney(amount)) {
           return showNotice("The two split amounts must add up exactly to the purchase amount.", "error");
         }
+
+        splits = [
+          { tag: matchingTag, amount: primaryAmount },
+          { tag: secondaryTag, amount: secondaryAmount }
+        ];
       }
 
       if (id) {
@@ -2913,48 +3120,34 @@
         if (!purchase) return showNotice("Purchase not found.", "error");
 
         purchase.name = name;
-        purchase.amount = primaryAmount;
+        purchase.amount = roundMoney(amount);
         purchase.tag = matchingTag;
         purchase.paymentMethodId = paymentMethodId;
         purchase.date = date;
 
-        if (isSplit) {
-          state.data.purchases.push({
-            id: createId(),
-            name,
-            amount: secondaryAmount,
-            tag: secondaryTag,
-            paymentMethodId,
-            date
-          });
+        if (splits) {
+          purchase.isSplit = true;
+          purchase.splits = splits;
+        } else {
+          delete purchase.isSplit;
+          delete purchase.splits;
         }
-      } else if (isSplit) {
-        state.data.purchases.push({
-          id: createId(),
-          name,
-          amount: primaryAmount,
-          tag: matchingTag,
-          paymentMethodId,
-          date
-        });
-
-        state.data.purchases.push({
-          id: createId(),
-          name,
-          amount: secondaryAmount,
-          tag: secondaryTag,
-          paymentMethodId,
-          date
-        });
       } else {
-        state.data.purchases.push({
+        const purchase = {
           id: createId(),
           name,
           amount: roundMoney(amount),
           tag: matchingTag,
           paymentMethodId,
           date
-        });
+        };
+
+        if (splits) {
+          purchase.isSplit = true;
+          purchase.splits = splits;
+        }
+
+        state.data.purchases.push(purchase);
       }
 
       saveData();
@@ -2970,8 +3163,6 @@
       state.activeTab = "purchases";
 
       els.purchaseFormTitle.textContent = "Edit Purchase";
-      els.purchaseSplitToggle.checked = false;
-      syncPurchaseSplitFields();
       els.purchaseId.value = purchase.id;
       els.purchaseName.value = purchase.name;
       els.purchaseAmount.value = purchase.amount;
@@ -2980,9 +3171,28 @@
       renderDatalists();
       renderPaymentMethodOptions();
 
-      const matchingTag = getMatchingBudgetTagForMonth(purchase.tag, purchase.date.slice(0, 7));
+      const split = getPurchaseSplits(purchase);
+      const isSplit = split.length > 1;
+      const matchingTag = getMatchingBudgetTagForMonth(split[0].tag, purchase.date.slice(0, 7));
+
       els.purchaseTag.value = matchingTag || "";
       els.purchasePaymentMethod.value = getPaymentMethodById(purchase.paymentMethodId) ? purchase.paymentMethodId : "";
+
+      els.purchaseSplitToggle.checked = isSplit;
+      syncPurchaseSplitFields();
+
+      if (isSplit) {
+        els.purchaseSplitAmountPrimary.value = split[0].amount;
+        renderDatalists();
+        const matchingSecondTag = getMatchingBudgetTagForMonth(split[1].tag, purchase.date.slice(0, 7));
+        els.purchaseSplitTag.value = matchingSecondTag || "";
+        els.purchaseSplitAmountSecondary.value = split[1].amount;
+      } else {
+        els.purchaseSplitAmountPrimary.value = "";
+        els.purchaseSplitTag.value = "";
+        els.purchaseSplitAmountSecondary.value = "";
+      }
+
       els.cancelPurchaseEditBtn.classList.remove("hidden");
 
       renderTabs();
@@ -3241,13 +3451,70 @@
     }
 
     function getSpentForBudget(budget, purchases) {
-      const tag = normalizeTag(budget.tag);
-
       return purchases.reduce((sum, purchase) => {
-        return normalizeTag(purchase.tag) === tag
-          ? sum + Number(purchase.amount)
+        return sum + getPurchaseAmountForTag(purchase, budget.tag);
+      }, 0);
+    }
+
+    function isSplitPurchase(purchase) {
+      return Array.isArray(purchase.splits) && purchase.splits.length > 1;
+    }
+
+    function getPurchaseSplits(purchase) {
+      if (isSplitPurchase(purchase)) {
+        return purchase.splits.map(part => ({
+          tag: String(part.tag || "").trim(),
+          amount: roundMoney(Number(part.amount))
+        }));
+      }
+
+      return [{
+        tag: String(purchase.tag || "").trim(),
+        amount: roundMoney(Number(purchase.amount))
+      }];
+    }
+
+    function getPurchaseAmountForTag(purchase, tag) {
+      const normalizedTag = normalizeTag(tag);
+
+      return getPurchaseSplits(purchase).reduce((sum, part) => {
+        return normalizeTag(part.tag) === normalizedTag
+          ? sum + Number(part.amount)
           : sum;
       }, 0);
+    }
+
+    function purchaseHasTag(purchase, tag) {
+      return getPurchaseAmountForTag(purchase, tag) !== 0;
+    }
+
+    function retagPurchaseBudgetTag(purchase, oldTag, newTag) {
+      if (isSplitPurchase(purchase)) {
+        purchase.splits = purchase.splits.map(part => {
+          if (normalizeTag(part.tag) === normalizeTag(oldTag)) {
+            return { ...part, tag: newTag };
+          }
+
+          return part;
+        });
+
+        purchase.tag = purchase.splits[0]?.tag || newTag;
+        return;
+      }
+
+      if (normalizeTag(purchase.tag) === normalizeTag(oldTag)) {
+        purchase.tag = newTag;
+      }
+    }
+
+    function getSplitSymbolHtml() {
+      return `<span class="split-symbol" aria-label="Split entry" title="Split entry">
+        <svg viewBox="0 0 100 76" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M41 76V46C41 36 34 29 23 29H13V14h10c13 0 23 5 30 16 7-11 17-16 30-16h10v15H83c-11 0-18 7-18 17v30H41z"></path>
+          <path fill="currentColor" d="M0 22L27 0v44L0 22z"></path>
+          <path fill="currentColor" d="M100 22L73 0v44l27-22z"></path>
+        </svg>
+      </span>`;
     }
 
     function getBudgetStatus(percent) {
@@ -3333,13 +3600,21 @@
       });
 
       const purchasesValid = value.purchases.every(purchase => {
-        return typeof purchase.id === "string" &&
+        const baseValid = typeof purchase.id === "string" &&
           typeof purchase.name === "string" &&
           Number.isFinite(Number(purchase.amount)) &&
           typeof purchase.tag === "string" &&
           typeof purchase.paymentMethodId === "string" &&
           typeof purchase.date === "string" &&
           /^\d{4}-\d{2}-\d{2}$/.test(purchase.date);
+
+        if (!baseValid) return false;
+
+        if (purchase.splits === undefined) return true;
+
+        return Array.isArray(purchase.splits) && purchase.splits.every(part => {
+          return typeof part.tag === "string" && Number.isFinite(Number(part.amount));
+        });
       });
 
       const paymentMethodsValid = value.paymentMethods.every(method => {
@@ -3372,14 +3647,26 @@
           type: budget.type,
           monthCreated: budget.monthCreated
         })),
-        purchases: data.purchases.map(purchase => ({
-          id: String(purchase.id),
-          name: String(purchase.name).trim(),
-          amount: roundMoney(Number(purchase.amount)),
-          tag: String(purchase.tag).trim(),
-          paymentMethodId: String(purchase.paymentMethodId),
-          date: purchase.date
-        })),
+        purchases: data.purchases.map(purchase => {
+          const normalized = {
+            id: String(purchase.id),
+            name: String(purchase.name).trim(),
+            amount: roundMoney(Number(purchase.amount)),
+            tag: String(purchase.tag).trim(),
+            paymentMethodId: String(purchase.paymentMethodId),
+            date: purchase.date
+          };
+
+          if (Array.isArray(purchase.splits) && purchase.splits.length > 1) {
+            normalized.isSplit = true;
+            normalized.splits = purchase.splits.map(part => ({
+              tag: String(part.tag).trim(),
+              amount: roundMoney(Number(part.amount))
+            }));
+          }
+
+          return normalized;
+        }),
         paymentMethods: data.paymentMethods.map(method => ({
           id: String(method.id),
           name: String(method.name).trim(),
@@ -3518,6 +3805,7 @@
         .replaceAll('"', "&quot;");
     }
 
+    window.openMopDetails = openMopDetails;
     window.openBudgetDetails = openBudgetDetails;
     window.closeBudgetModal = closeBudgetModal;
     window.openCalendarDayDetails = openCalendarDayDetails;

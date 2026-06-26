@@ -2424,12 +2424,16 @@
     }
 
     function renderDatalists() {
+      const currentPurchaseTag = els.purchaseTag ? els.purchaseTag.value : "";
       const purchaseMonth = els.purchaseDate.value && isValidDate(els.purchaseDate.value)
         ? els.purchaseDate.value.slice(0, 7)
         : state.selectedMonth;
 
       const selectedMonthTags = getBudgetTagsForMonth(state.selectedMonth);
       const purchaseMonthTags = getBudgetTagsForMonth(purchaseMonth);
+      const matchingCurrentPurchaseTag = currentPurchaseTag
+        ? purchaseMonthTags.find(tag => normalizeTag(tag) === normalizeTag(currentPurchaseTag))
+        : "";
 
       els.budgetTagOptions.innerHTML = selectedMonthTags
         .map(tag => `<option value="${escapeHtml(tag)}"></option>`)
@@ -2449,6 +2453,7 @@
         els.purchaseTag.innerHTML =
           `<option value="">Select a budget tag</option>` +
           purchaseMonthTags.map(tag => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`).join("");
+        els.purchaseTag.value = matchingCurrentPurchaseTag || "";
       }
     }
 
@@ -3012,7 +3017,13 @@
 
     function getBillsForMonth(yearMonth) {
       return state.data.bills.filter(bill => {
-        return bill.type === "recurring" || bill.date.slice(0, 7) === yearMonth;
+        const billStartMonth = bill.date.slice(0, 7);
+
+        if (bill.type === "recurring") {
+          return billStartMonth <= yearMonth;
+        }
+
+        return billStartMonth === yearMonth;
       });
     }
 

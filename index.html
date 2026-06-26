@@ -1243,7 +1243,11 @@
             <div id="billRecurringDayWrap">
               <label for="billDay">Day it will be paid each month</label>
               <input id="billDay" type="number" min="1" max="31" step="1" placeholder="15" />
-              <p class="form-note">For recurring bills, enter only the day of the month. Example: enter 15 for the 15th of every month.</p>
+
+              <label for="billStartMonth">Starting month</label>
+              <input id="billStartMonth" type="month" />
+
+              <p class="form-note">For recurring bills, choose the day of the month and the first month it should count. It will be included from that month onward, not before.</p>
             </div>
 
             <div id="billOneTimeDateWrap" class="hidden">
@@ -1498,6 +1502,7 @@
       billPaymentMethod: document.getElementById("billPaymentMethod"),
       billType: document.getElementById("billType"),
       billDay: document.getElementById("billDay"),
+      billStartMonth: document.getElementById("billStartMonth"),
       billDate: document.getElementById("billDate"),
       billRecurringDayWrap: document.getElementById("billRecurringDayWrap"),
       billOneTimeDateWrap: document.getElementById("billOneTimeDateWrap"),
@@ -2630,6 +2635,7 @@
       const paymentMethodId = els.billPaymentMethod.value;
       const type = els.billType.value;
       const day = Number(els.billDay.value);
+      const startMonth = els.billStartMonth.value || state.selectedMonth;
       const date = els.billDate.value;
 
       if (!title) return showNotice("Bill title is required.", "error");
@@ -2646,8 +2652,12 @@
           return showNotice("Recurring bill day must be between 1 and 31.", "error");
         }
 
+        if (!/^\d{4}-\d{2}$/.test(startMonth)) {
+          return showNotice("Recurring bill starting month is invalid.", "error");
+        }
+
         billDay = day;
-        billDate = `${state.selectedMonth}-${String(Math.min(day, getDaysInMonth(state.selectedMonth))).padStart(2, "0")}`;
+        billDate = `${startMonth}-${String(Math.min(day, getDaysInMonth(startMonth))).padStart(2, "0")}`;
       } else {
         if (!isValidDate(date)) return showNotice("Bill date is invalid.", "error");
         billDay = Number(date.slice(8, 10));
@@ -2694,6 +2704,7 @@
       els.billPaymentMethod.value = bill.paymentMethodId || "";
       els.billType.value = bill.type;
       els.billDay.value = bill.day || Number(bill.date.slice(8, 10));
+      els.billStartMonth.value = bill.date.slice(0, 7);
       els.billDate.value = bill.date;
       els.cancelBillEditBtn.classList.remove("hidden");
       syncBillTypeFields();
@@ -3235,6 +3246,7 @@
     function setDefaultBillInputs() {
       const today = new Date();
       els.billDay.value = String(today.getDate());
+      els.billStartMonth.value = state.selectedMonth;
       els.billDate.value = toDateInputValue(today);
       syncBillTypeFields();
     }

@@ -26,7 +26,9 @@
       --radius: 18px;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -42,10 +44,21 @@
       transition: background 0.2s ease;
     }
 
-    .header-inner { max-width: 1180px; margin: 0 auto; }
+    .header-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      text-align: center;
+    }
 
-    h1 { margin: 0 0 6px; font-size: clamp(1.7rem, 4vw, 2.5rem); }
-    .subtitle { margin: 0; opacity: 0.9; }
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+    }
+
+    .subtitle {
+      margin: 0;
+      opacity: 0.9;
+    }
 
     .app {
       max-width: 1180px;
@@ -65,21 +78,23 @@
       padding: 16px;
       margin-bottom: 16px;
       border-top: 10px solid var(--month-color);
-      transition: border-color 0.2s ease;
     }
 
     .month-row {
-      display: flex;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
       align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      justify-items: center;
+      text-align: center;
     }
 
-    .month-title { font-weight: 800; font-size: 1.3rem; }
+    .month-title {
+      font-weight: 800;
+      font-size: 1.3rem;
+    }
 
     .month-controls,
-    .tabs,
     .form-actions,
     .row-actions {
       display: flex;
@@ -92,10 +107,29 @@
       margin-top: 14px;
       border-top: 1px solid var(--border);
       padding-top: 14px;
+      display: grid;
+      gap: 8px;
     }
 
-    button,
-    .button-like {
+    .nav-break {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    .nav-subgrid {
+      display: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: -2px;
+      margin-bottom: 4px;
+    }
+
+    .nav-subgrid.show {
+      display: grid;
+    }
+
+    button {
       border: 0;
       border-radius: 12px;
       padding: 10px 13px;
@@ -106,22 +140,53 @@
       transition: 0.15s ease;
       font-family: inherit;
       font-size: 0.94rem;
+      touch-action: manipulation;
     }
 
-    button:hover,
-    .button-like:hover { transform: translateY(-1px); filter: brightness(0.98); }
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(0.98);
+    }
 
-    button.primary { background: var(--primary); color: white; }
-    button.primary:hover { background: var(--primary-dark); }
-    button.danger { background: var(--soft-danger); color: var(--danger); }
-    button.warning { background: var(--soft-warning); color: #92400e; }
-    button.ghost { background: #f3f4f6; color: #374151; }
+    button.primary {
+      background: var(--primary);
+      color: white;
+    }
 
+    button.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    button.danger {
+      background: var(--soft-danger);
+      color: var(--danger);
+    }
+
+    button.ghost {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    button.nav-main,
     button.tab {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
+      width: 100%;
       min-height: 44px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    button.nav-main {
+      background: #f8fafc;
+      color: #374151;
+      font-weight: 900;
+    }
+
+    button.nav-main.open {
+      background: #eef2ff;
+      color: #1e3a8a;
+      border-color: #dbeafe;
     }
 
     button.tab.active {
@@ -130,32 +195,119 @@
       border-color: var(--primary);
     }
 
-    button.tab.tab-purchases { min-width: 170px; }
-    button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
-    .grid { display: grid; gap: 16px; }
-    .grid.two { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
-    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-
-    .card { padding: 18px; margin-bottom: 16px; }
-    #dashboard > .card { margin-top: 16px; }
-    .card h2, .card h3 { margin: 0 0 12px; }
-
-    .muted { color: var(--muted); }
-    .small { font-size: 0.9rem; }
-
-    .summary-card {
-      padding: 18px;
-      border-radius: 16px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
+    button.tab.tab-purchases,
+    button.tab.tab-calendar,
+    button.tab.tab-dashboard {
+      background: #eef2ff;
+      color: #1e3a8a;
+      border-color: #dbeafe;
+      font-weight: 900;
     }
 
-    .summary-card .label { color: var(--muted); font-size: 0.9rem; margin-bottom: 5px; }
-    .summary-card .value { font-weight: 900; font-size: 1.35rem; }
+    button.tab.tab-purchases.active,
+    button.tab.tab-calendar.active,
+    button.tab.tab-dashboard.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+
+    .card {
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0 0 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 0.9rem;
+    }
+
+    .dashboard-summary {
+      background: white;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .summary-combined {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .summary-mini {
+      padding: 10px;
+      border-right: 1px solid var(--border);
+    }
+
+    .summary-mini:last-child {
+      border-right: 0;
+    }
+
+    .summary-mini .label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-bottom: 5px;
+    }
+
+    .summary-mini .value {
+      font-weight: 950;
+      font-size: 1.2rem;
+    }
+
+    .monthly-grand-total {
+      border-top: 1px solid var(--border);
+      margin-top: 10px;
+      padding: 12px 10px 4px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .monthly-grand-total .label {
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .monthly-grand-total .value {
+      font-size: 1.45rem;
+      font-weight: 950;
+    }
 
     .budget-carousel {
       display: grid;
@@ -169,9 +321,6 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    .budget-carousel::-webkit-scrollbar { height: 8px; }
-    .budget-carousel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-
     .budget-card {
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -179,13 +328,10 @@
       background: #fff;
       scroll-snap-align: start;
       min-height: 245px;
-    }
-
-    .budget-card.clickable {
       cursor: pointer;
     }
 
-    .budget-card.clickable:hover {
+    .budget-card:hover {
       border-color: var(--primary);
       box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
     }
@@ -199,7 +345,10 @@
       margin-bottom: 10px;
     }
 
-    .budget-name { font-weight: 900; font-size: 1.07rem; }
+    .budget-name {
+      font-weight: 900;
+      font-size: 1.07rem;
+    }
 
     .tag {
       display: inline-flex;
@@ -228,9 +377,20 @@
       white-space: nowrap;
     }
 
-    .status.good { background: var(--soft-good); color: var(--good); }
-    .status.warning { background: var(--soft-warning); color: #92400e; }
-    .status.danger { background: var(--soft-danger); color: var(--danger); }
+    .status.good {
+      background: var(--soft-good);
+      color: var(--good);
+    }
+
+    .status.warning {
+      background: var(--soft-warning);
+      color: #92400e;
+    }
+
+    .status.danger {
+      background: var(--soft-danger);
+      color: var(--danger);
+    }
 
     .progress-wrap {
       width: 100%;
@@ -241,12 +401,30 @@
       margin: 12px 0;
     }
 
-    .progress-bar { height: 100%; width: 0%; border-radius: 999px; transition: width 0.2s ease; }
-    .progress-bar.good { background: var(--good); }
-    .progress-bar.warning { background: var(--warning); }
-    .progress-bar.danger { background: var(--danger); }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.2s ease;
+    }
 
-    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .progress-bar.good {
+      background: var(--good);
+    }
+
+    .progress-bar.warning {
+      background: var(--warning);
+    }
+
+    .progress-bar.danger {
+      background: var(--danger);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
 
     .stat {
       padding: 10px;
@@ -255,14 +433,24 @@
       border: 1px solid var(--border);
     }
 
-    .stat .label { color: var(--muted); font-size: 0.78rem; margin-bottom: 4px; }
-    .stat .value { font-weight: 900; }
+    .stat .label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+    }
 
-    label { display: block; font-weight: 800; margin: 12px 0 6px; }
+    .stat .value {
+      font-weight: 900;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      margin: 12px 0 6px;
+    }
 
     input,
-    select,
-    textarea {
+    select {
       width: 100%;
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -274,14 +462,22 @@
     }
 
     input:focus,
-    select:focus,
-    textarea:focus {
+    select:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
     }
 
-    .form-note { font-size: 0.86rem; color: var(--muted); margin-top: 8px; line-height: 1.4; }
-    .list { display: grid; gap: 10px; }
+    .form-note {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
 
     .list-item {
       border: 1px solid var(--border);
@@ -294,14 +490,270 @@
       align-items: flex-start;
     }
 
-    .purchase-list-item {
-      border-width: 2px;
-      border-color: #dbe3ef;
+    .item-title {
+      font-weight: 900;
+      margin-bottom: 5px;
     }
 
-    .item-title { font-weight: 900; margin-bottom: 5px; }
-    .item-meta { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
-    .item-amount { font-weight: 900; font-size: 1.05rem; white-space: nowrap; }
+    .item-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .item-amount {
+      font-weight: 900;
+      font-size: 1.05rem;
+      white-space: nowrap;
+    }
+
+    .purchase-compact {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: white;
+      overflow: hidden;
+    }
+
+    .purchase-compact[open] {
+      border-color: #cbd5e1;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .purchase-compact.reimbursement {
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+    }
+
+    .purchase-compact.reimbursement summary {
+      background: #ecfdf5;
+    }
+
+    .purchase-compact.reimbursement .purchase-expanded {
+      background: #dcfce7;
+    }
+
+    .purchase-compact.reimbursement .purchase-summary-amount {
+      color: #15803d;
+    }
+
+    .purchase-compact.untracked {
+      background: #fef3c7;
+      border-color: #facc15;
+    }
+
+    .purchase-compact.untracked summary {
+      background: #fef3c7;
+    }
+
+    .purchase-compact.untracked .purchase-expanded {
+      background: #fef9c3;
+    }
+
+    .purchase-compact.untracked .purchase-summary-amount {
+      color: #92400e;
+    }
+
+    .calendar-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .calendar-weekday {
+      text-align: center;
+      font-weight: 900;
+      color: var(--muted);
+      font-size: 0.82rem;
+      padding: 8px 4px;
+    }
+
+    .calendar-day {
+      height: 118px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: white;
+      padding: 9px;
+      overflow: hidden;
+      text-align: left;
+      color: var(--text);
+      font: inherit;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .calendar-day.has-purchases {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      cursor: pointer;
+    }
+
+    .calendar-day.has-purchases:hover {
+      filter: brightness(0.99);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.14);
+    }
+
+    .calendar-day.outside-month {
+      background: #f8fafc;
+      color: #94a3b8;
+      opacity: 0.72;
+    }
+
+    .calendar-day.outside-month.has-purchases {
+      background: #f8fafc;
+      border-color: var(--border);
+      cursor: default;
+    }
+
+    .calendar-day.today {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .calendar-day-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+      margin-bottom: 7px;
+    }
+
+    .calendar-day-number {
+      font-weight: 950;
+      font-size: 0.95rem;
+    }
+
+    .calendar-day-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: white;
+      font-weight: 950;
+      font-size: 0.82rem;
+      line-height: 1;
+    }
+
+    .calendar-day-summary {
+      font-size: 0.76rem;
+      font-weight: 900;
+      color: #1e3a8a;
+      display: grid;
+      gap: 3px;
+    }
+
+    .calendar-day-summary .calendar-day-total {
+      color: #1e3a8a;
+      white-space: nowrap;
+    }
+
+    .calendar-purchase-list {
+      display: grid;
+      gap: 5px;
+    }
+
+    .calendar-purchase {
+      border: 1px solid #dbeafe;
+      background: #eef2ff;
+      color: #1e3a8a;
+      border-radius: 10px;
+      padding: 6px 7px;
+      font-size: 0.78rem;
+      line-height: 1.25;
+    }
+
+    .calendar-purchase.reimbursement {
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+      color: #15803d;
+    }
+
+    .calendar-purchase.untracked {
+      background: #fef3c7;
+      border-color: #facc15;
+      color: #92400e;
+    }
+
+    .calendar-purchase-title {
+      font-weight: 900;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .calendar-purchase-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 2px;
+      font-size: 0.72rem;
+      opacity: 0.92;
+    }
+
+    .calendar-more {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 2px 1px;
+    }
+
+    .purchase-compact summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .purchase-compact summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .purchase-summary-title {
+      font-weight: 900;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .purchase-summary-date {
+      color: var(--muted);
+      font-size: 0.83rem;
+      margin-top: 2px;
+    }
+
+    .purchase-summary-amount {
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .purchase-expanded {
+      border-top: 1px solid var(--border);
+      padding: 12px 14px 14px;
+      background: #f8fafc;
+    }
+
+    .purchase-expanded-grid {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 12px;
+    }
 
     .empty {
       border: 1px dashed #cbd5e1;
@@ -320,16 +772,46 @@
       font-weight: 700;
     }
 
-    .notice.show { display: block; }
-    .notice.success { background: var(--soft-good); color: var(--good); }
-    .notice.error { background: var(--soft-danger); color: var(--danger); }
-    .notice.warning { background: var(--soft-warning); color: #92400e; }
-    .duplicate-warning { margin-top: 10px; }
-    .hidden { display: none !important; }
-    .file-input { padding: 9px; background: #f9fafb; }
-    .danger-zone { border-color: #fecaca; background: #fff7f7; }
+    .notice.show {
+      display: block;
+    }
 
-    .mop-total-card {
+    .notice.success {
+      background: var(--soft-good);
+      color: var(--good);
+    }
+
+    .notice.error {
+      background: var(--soft-danger);
+      color: var(--danger);
+    }
+
+    .notice.warning {
+      background: var(--soft-warning);
+      color: #92400e;
+    }
+
+    .duplicate-warning {
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .file-input {
+      padding: 9px;
+      background: #f9fafb;
+    }
+
+    .danger-zone {
+      border-color: #fecaca;
+      background: #fff7f7;
+    }
+
+    .mop-total-card,
+    .year-total-card,
+    .month-total-card {
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 16px;
@@ -340,8 +822,67 @@
       align-items: center;
     }
 
-    .mop-total-name { font-weight: 900; font-size: 1.08rem; }
-    .mop-total-amount { font-weight: 950; font-size: 1.3rem; }
+    .mop-total-name,
+    .year-total-name,
+    .month-total-name {
+      font-weight: 900;
+      font-size: 1.08rem;
+    }
+
+    .mop-total-amount,
+    .year-total-amount,
+    .month-total-amount {
+      font-weight: 950;
+      font-size: 1.3rem;
+    }
+
+    .month-total-toggle {
+      width: 100%;
+      margin: 14px 0 14px;
+      background: #eef2ff;
+      color: #1e3a8a;
+      border: 1px solid #dbeafe;
+      font-weight: 900;
+    }
+
+    .month-total-panel {
+      display: none;
+      margin-bottom: 4px;
+    }
+
+    .month-total-panel.show {
+      display: grid;
+      gap: 10px;
+    }
+
+    .pie-wrap {
+      display: grid;
+      place-items: center;
+      margin: 18px 0;
+    }
+
+    .pie-chart {
+      width: min(280px, 75vw);
+      height: min(280px, 75vw);
+      border-radius: 50%;
+      background: conic-gradient(#e5e7eb 0deg 360deg);
+      border: 8px solid white;
+      box-shadow: var(--shadow);
+    }
+
+    .legend-row {
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: center;
+      font-size: 0.92rem;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+    }
 
     .modal-backdrop {
       position: fixed;
@@ -354,7 +895,9 @@
       z-index: 999;
     }
 
-    .modal-backdrop.show { display: flex; }
+    .modal-backdrop.show {
+      display: flex;
+    }
 
     .modal {
       width: min(720px, 100%);
@@ -376,7 +919,32 @@
       margin-bottom: 14px;
     }
 
-    .modal-title { font-size: 1.25rem; font-weight: 950; margin: 0; }
+
+    .confirm-message {
+      white-space: pre-line;
+      color: var(--text);
+      line-height: 1.45;
+      margin: 0 0 16px;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .confirm-actions button {
+      min-width: 120px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 950;
+      margin: 0;
+    }
 
     footer {
       max-width: 1180px;
@@ -389,54 +957,100 @@
 
     @media (max-width: 850px) {
       .grid.two,
-      .grid.three,
-      .stats { grid-template-columns: 1fr; }
+      .stats {
+        grid-template-columns: 1fr;
+      }
 
-      h1 { font-size: 2rem; }
+      h1 {
+        font-size: 2rem;
+      }
 
-      .budget-head { display: grid; grid-template-columns: 1fr; }
-      .status { justify-self: start; }
+      .summary-mini {
+        padding: 8px 6px;
+      }
 
-      .list-item { flex-direction: column; }
-      .item-amount { white-space: normal; }
+      .summary-mini .label {
+        font-size: 0.64rem;
+        line-height: 1.2;
+      }
+
+      .summary-mini .value {
+        font-size: 0.92rem;
+      }
+
+      .monthly-grand-total .value {
+        font-size: 1.15rem;
+      }
+
+      .budget-head {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .status {
+        justify-self: start;
+      }
+
+      .list-item {
+        flex-direction: column;
+      }
+
+      .item-amount {
+        white-space: normal;
+      }
 
       .month-controls,
       .form-actions,
-      .row-actions { width: 100%; }
+      .row-actions {
+        width: 100%;
+      }
 
       .month-controls button,
-      .form-actions button { flex: 1; }
-
-      .tabs {
-        display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 8px;
+      .form-actions button {
+        flex: 1;
       }
 
-      .tabs button {
-        width: 100%;
-        min-width: 0;
-        justify-content: center;
-        text-align: center;
+      .budget-carousel {
+        grid-auto-columns: minmax(278px, 86vw);
       }
 
-      .tab-dashboard,
-      .tab-budgets,
-      .tab-mop {
-        grid-column: span 2;
+      .modal-backdrop {
+        align-items: flex-end;
+        padding: 10px;
       }
 
-      .tab-import,
-      .tab-mop-totals {
-        grid-column: span 3;
+      .purchase-compact summary {
+        padding: 11px 12px;
       }
 
-      .tab-purchases {
-        grid-column: 1 / -1;
+      .calendar-grid {
+        gap: 5px;
       }
 
-      .budget-carousel { grid-auto-columns: minmax(278px, 86vw); }
-      .modal-backdrop { align-items: flex-end; padding: 10px; }
+      .calendar-weekday {
+        font-size: 0.68rem;
+        padding: 5px 1px;
+      }
+
+      .calendar-day {
+        min-height: 104px;
+        border-radius: 10px;
+        padding: 6px;
+      }
+
+      .calendar-day-total {
+        display: none;
+      }
+
+      .calendar-purchase {
+        font-size: 0.68rem;
+        padding: 5px;
+      }
+
+      .calendar-purchase-meta {
+        display: block;
+        font-size: 0.64rem;
+      }
     }
   </style>
 </head>
@@ -465,35 +1079,64 @@
       </div>
 
       <nav class="tabs" aria-label="App sections">
-        <button type="button" class="tab tab-dashboard" data-tab="dashboard">Dashboard</button>
-        <button type="button" class="tab tab-budgets" data-tab="budgets">Budgets</button>
-        <button type="button" class="tab tab-mop" data-tab="paymentMethods">MOP</button>
-        <button type="button" class="tab tab-import" data-tab="importExport">Import / Export</button>
-        <button type="button" class="tab tab-mop-totals" data-tab="mopTotals">MOP Totals</button>
+        <button type="button" class="nav-main" id="accountConfigToggle">Account Configuration</button>
+
+        <div class="nav-subgrid" id="accountConfigMenu">
+          <button type="button" class="tab" data-tab="budgets">Budgets</button>
+          <button type="button" class="tab" data-tab="paymentMethods">MOP</button>
+          <button type="button" class="tab" data-tab="export">Export</button>
+          <button type="button" class="tab" data-tab="bills">Bills</button>
+        </div>
+
+        <button type="button" class="nav-main" id="totalsToggle">Account Totals</button>
+
+        <div class="nav-subgrid" id="totalsMenu">
+          <button type="button" class="tab" data-tab="mopTotals">MOP Totals</button>
+          <button type="button" class="tab" data-tab="yearTotal">Year Total</button>
+        </div>
+
+        <div class="nav-break"></div>
+
         <button type="button" class="tab tab-purchases" data-tab="purchases">Purchases</button>
+        <button type="button" class="tab tab-calendar" data-tab="calendar">Calendar</button>
+        <button type="button" class="tab tab-dashboard active" data-tab="dashboard">Dashboard Overview</button>
       </nav>
     </section>
 
     <div id="notice" class="notice" role="status"></div>
 
     <section id="dashboard" class="tab-panel active">
-      <div class="grid three">
-        <div class="summary-card">
-          <div class="label">Total budgeted</div>
-          <div class="value" id="totalBudgeted">$0.00</div>
+      <div class="dashboard-summary">
+        <div class="summary-combined">
+          <div class="summary-mini">
+            <div class="label">Bills/Expenses</div>
+            <div class="value" id="billsExpensesTotal">$0.00</div>
+          </div>
+          <div class="summary-mini">
+            <div class="label">Total budgeted</div>
+            <div class="value" id="totalBudgeted">$0.00</div>
+          </div>
+          <div class="summary-mini">
+            <div class="label">Total spent</div>
+            <div class="value" id="totalSpent">$0.00</div>
+          </div>
+          <div class="summary-mini">
+            <div class="label">Total remaining</div>
+            <div class="value" id="totalRemaining">$0.00</div>
+          </div>
         </div>
-        <div class="summary-card">
-          <div class="label">Total spent</div>
-          <div class="value" id="totalSpent">$0.00</div>
-        </div>
-        <div class="summary-card">
-          <div class="label">Total remaining</div>
-          <div class="value" id="totalRemaining">$0.00</div>
+
+        <div class="monthly-grand-total">
+          <div>
+            <div class="label">Total Spent</div>
+            <div class="muted small">Bills/Expenses + Budget Spending</div>
+          </div>
+          <div class="value" id="totalSpentForMonth">$0.00</div>
         </div>
       </div>
 
       <div class="card">
-        <h2>Budget Dashboard</h2>
+        <h2>Dashboard Overview</h2>
         <p class="muted">Swipe left and right to see this month's budgets. Tap a budget to see the purchases that make it up.</p>
         <div id="duplicateTagWarning" class="notice warning duplicate-warning"></div>
         <div id="dashboardBudgetList"></div>
@@ -507,6 +1150,7 @@
 
           <form id="budgetForm">
             <input type="hidden" id="budgetId" />
+
             <label for="budgetName">Budget name</label>
             <input id="budgetName" placeholder="Groceries, Rent, Dining Out" />
 
@@ -575,6 +1219,54 @@
       </div>
     </section>
 
+    <section id="bills" class="tab-panel">
+      <div class="grid two">
+        <div class="card">
+          <h2 id="billFormTitle">Add Bill</h2>
+
+          <form id="billForm">
+            <input type="hidden" id="billId" />
+
+            <label for="billTitle">Bill title</label>
+            <input id="billTitle" placeholder="Rent, utilities, insurance, phone bill" />
+
+            <label for="billAmount">Bill amount</label>
+            <input id="billAmount" type="number" step="0.01" min="0" placeholder="125.00" />
+
+            <label for="billPaymentMethod">MOP used</label>
+            <select id="billPaymentMethod"></select>
+
+            <label for="billType">Bill type</label>
+            <select id="billType">
+              <option value="recurring">Recurring monthly</option>
+              <option value="one-time">One-time</option>
+            </select>
+
+            <div id="billRecurringDayWrap">
+              <label for="billDay">Day it will be paid each month</label>
+              <input id="billDay" type="number" min="1" max="31" step="1" placeholder="15" />
+              <p class="form-note">For recurring bills, enter only the day of the month. Example: enter 15 for the 15th of every month.</p>
+            </div>
+
+            <div id="billOneTimeDateWrap" class="hidden">
+              <label for="billDate">One-time payment date</label>
+              <input id="billDate" type="date" />
+            </div>
+
+            <div class="form-actions" style="margin-top: 14px;">
+              <button type="submit" class="primary">Save bill</button>
+              <button type="button" id="cancelBillEditBtn" class="ghost hidden">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Bills for Selected Month</h2>
+          <div id="billList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
     <section id="purchases" class="tab-panel">
       <div class="grid two">
         <div class="card">
@@ -584,14 +1276,15 @@
             <input type="hidden" id="purchaseId" />
 
             <label for="purchaseName">Purchase name</label>
-            <input id="purchaseName" placeholder="Coffee, groceries, utility bill" />
+            <input id="purchaseName" placeholder="Coffee, groceries, utility bill, Venmo payback" />
 
             <label for="purchaseAmount">Purchase amount</label>
-            <input id="purchaseAmount" type="number" step="0.01" min="0" placeholder="25.00" />
+            <input id="purchaseAmount" type="number" step="0.01" placeholder="25.00 or -25.00" />
+            <p class="form-note">Use a positive amount for spending. Use a negative amount for paybacks, refunds, or reimbursements.</p>
 
-            <label for="purchaseTag">Tag</label>
-            <input id="purchaseTag" list="purchaseTagOptions" placeholder="groceries" />
-            <datalist id="purchaseTagOptions"></datalist>
+            <label for="purchaseTag">Budget tag</label>
+            <select id="purchaseTag"></select>
+            <p class="form-note">Choose an existing budget tag for the purchase date. Yellow purchases become normal after you choose an active budget tag and active MOP, then save.</p>
 
             <label for="purchasePaymentMethod">MOP used</label>
             <select id="purchasePaymentMethod"></select>
@@ -608,8 +1301,17 @@
 
         <div class="card">
           <h2>Purchases for Selected Month</h2>
+          <p class="muted small">Tap a purchase to view tag, MOP, edit, or delete options. Negative paybacks show in green.</p>
           <div id="purchaseList" class="list"></div>
         </div>
+      </div>
+    </section>
+
+    <section id="calendar" class="tab-panel">
+      <div class="card">
+        <h2>Purchase Calendar for <span id="purchaseCalendarMonthLabel"></span></h2>
+        <p class="muted">A full calendar view of the selected month. Days with purchases are highlighted light blue and show the number of purchases. Click a highlighted day to view each purchase by cost.</p>
+        <div id="purchaseCalendar" class="calendar-wrap"></div>
       </div>
     </section>
 
@@ -621,11 +1323,28 @@
       </div>
     </section>
 
-    <section id="importExport" class="tab-panel">
+    <section id="yearTotal" class="tab-panel">
+      <div class="card">
+        <h2>Year Total for <span id="yearTotalYearLabel"></span></h2>
+        <p class="muted">Totals are calculated from purchases dated January through December for the selected year, grouped by budget tag.</p>
+
+        <div class="pie-wrap">
+          <div id="yearPieChart" class="pie-chart"></div>
+        </div>
+
+        <h3>Budget Tag Breakdown</h3>
+        <div id="yearTotalList" class="list"></div>
+
+        <button type="button" id="monthTotalsToggle" class="month-total-toggle">Month Totals</button>
+        <div id="monthTotalsPanel" class="month-total-panel"></div>
+      </div>
+    </section>
+
+    <section id="export" class="tab-panel">
       <div class="grid two">
         <div class="card">
           <h2>Export Data</h2>
-          <p class="muted">Download all budgets, purchases, and MOPs as a JSON backup file.</p>
+          <p class="muted">Download all budgets, purchases, MOPs, and bills as a JSON backup file.</p>
           <button type="button" id="exportBtn" class="primary">Export JSON</button>
         </div>
 
@@ -641,7 +1360,7 @@
 
       <div class="card danger-zone">
         <h2>Reset All Data</h2>
-        <p class="muted">This permanently deletes all local budgets, purchases, and MOPs stored in this browser.</p>
+        <p class="muted">This permanently deletes all local budgets, purchases, MOPs, and bills stored in this browser.</p>
         <button type="button" id="resetBtn" class="danger">Reset all data</button>
       </div>
     </section>
@@ -657,6 +1376,41 @@
         <button type="button" id="closeBudgetModalBtn" class="ghost">Close</button>
       </div>
       <div id="budgetModalContent"></div>
+    </div>
+  </div>
+
+
+  <div id="calendarDayModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="calendarDayModalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="calendarDayModalTitle" class="modal-title">Calendar day purchases</h2>
+          <div id="calendarDayModalSubtitle" class="muted small"></div>
+        </div>
+        <button type="button" id="closeCalendarDayModalBtn" class="ghost">Close</button>
+      </div>
+      <div id="calendarDayModalContent"></div>
+    </div>
+  </div>
+
+
+
+
+  <div id="deleteConfirmBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="deleteConfirmTitle" class="modal-title">Confirm delete</h2>
+          <div class="muted small">Please review before deleting.</div>
+        </div>
+      </div>
+
+      <p id="deleteConfirmMessage" class="confirm-message"></p>
+
+      <div class="confirm-actions">
+        <button type="button" id="cancelDeleteBtn" class="ghost">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="danger">Yes, delete</button>
+      </div>
     </div>
   </div>
 
@@ -683,10 +1437,21 @@
       "12": "#60a5fa"
     };
 
+    const PIE_COLORS = [
+      "#2563eb", "#16a34a", "#f97316", "#9f2f24", "#7c3aed",
+      "#0891b2", "#f59e0b", "#14532d", "#be123c", "#475569"
+    ];
+
     const state = {
-      data: { budgets: [], purchases: [], paymentMethods: [] },
+      data: {
+        budgets: [],
+        purchases: [],
+        paymentMethods: [],
+        bills: []
+      },
       selectedMonth: getCurrentMonth(),
-      activeTab: "dashboard"
+      activeTab: "dashboard",
+      pendingDelete: null
     };
 
     const currencyFormatter = new Intl.NumberFormat(undefined, {
@@ -699,6 +1464,12 @@
       prevMonthBtn: document.getElementById("prevMonthBtn"),
       nextMonthBtn: document.getElementById("nextMonthBtn"),
       currentMonthBtn: document.getElementById("currentMonthBtn"),
+
+      accountConfigToggle: document.getElementById("accountConfigToggle"),
+      accountConfigMenu: document.getElementById("accountConfigMenu"),
+      totalsToggle: document.getElementById("totalsToggle"),
+      totalsMenu: document.getElementById("totalsMenu"),
+
       tabs: document.querySelectorAll(".tab"),
       panels: document.querySelectorAll(".tab-panel"),
       notice: document.getElementById("notice"),
@@ -706,8 +1477,10 @@
       totalBudgeted: document.getElementById("totalBudgeted"),
       totalSpent: document.getElementById("totalSpent"),
       totalRemaining: document.getElementById("totalRemaining"),
+      totalSpentForMonth: document.getElementById("totalSpentForMonth"),
       dashboardBudgetList: document.getElementById("dashboardBudgetList"),
       duplicateTagWarning: document.getElementById("duplicateTagWarning"),
+      billsExpensesTotal: document.getElementById("billsExpensesTotal"),
 
       budgetForm: document.getElementById("budgetForm"),
       budgetFormTitle: document.getElementById("budgetFormTitle"),
@@ -720,6 +1493,20 @@
       cancelBudgetEditBtn: document.getElementById("cancelBudgetEditBtn"),
       budgetTagOptions: document.getElementById("budgetTagOptions"),
 
+      billForm: document.getElementById("billForm"),
+      billFormTitle: document.getElementById("billFormTitle"),
+      billId: document.getElementById("billId"),
+      billTitle: document.getElementById("billTitle"),
+      billAmount: document.getElementById("billAmount"),
+      billPaymentMethod: document.getElementById("billPaymentMethod"),
+      billType: document.getElementById("billType"),
+      billDay: document.getElementById("billDay"),
+      billDate: document.getElementById("billDate"),
+      billRecurringDayWrap: document.getElementById("billRecurringDayWrap"),
+      billOneTimeDateWrap: document.getElementById("billOneTimeDateWrap"),
+      billList: document.getElementById("billList"),
+      cancelBillEditBtn: document.getElementById("cancelBillEditBtn"),
+
       purchaseForm: document.getElementById("purchaseForm"),
       purchaseFormTitle: document.getElementById("purchaseFormTitle"),
       purchaseId: document.getElementById("purchaseId"),
@@ -729,6 +1516,8 @@
       purchasePaymentMethod: document.getElementById("purchasePaymentMethod"),
       purchaseDate: document.getElementById("purchaseDate"),
       purchaseList: document.getElementById("purchaseList"),
+      purchaseCalendarMonthLabel: document.getElementById("purchaseCalendarMonthLabel"),
+      purchaseCalendar: document.getElementById("purchaseCalendar"),
       cancelPurchaseEditBtn: document.getElementById("cancelPurchaseEditBtn"),
       purchaseTagOptions: document.getElementById("purchaseTagOptions"),
 
@@ -743,11 +1532,29 @@
       mopTotalsMonthLabel: document.getElementById("mopTotalsMonthLabel"),
       mopTotalsList: document.getElementById("mopTotalsList"),
 
+      yearTotalYearLabel: document.getElementById("yearTotalYearLabel"),
+      yearPieChart: document.getElementById("yearPieChart"),
+      yearTotalList: document.getElementById("yearTotalList"),
+      monthTotalsToggle: document.getElementById("monthTotalsToggle"),
+      monthTotalsPanel: document.getElementById("monthTotalsPanel"),
+
       budgetModalBackdrop: document.getElementById("budgetModalBackdrop"),
       budgetModalTitle: document.getElementById("budgetModalTitle"),
       budgetModalSubtitle: document.getElementById("budgetModalSubtitle"),
       budgetModalContent: document.getElementById("budgetModalContent"),
       closeBudgetModalBtn: document.getElementById("closeBudgetModalBtn"),
+
+      calendarDayModalBackdrop: document.getElementById("calendarDayModalBackdrop"),
+      calendarDayModalTitle: document.getElementById("calendarDayModalTitle"),
+      calendarDayModalSubtitle: document.getElementById("calendarDayModalSubtitle"),
+      calendarDayModalContent: document.getElementById("calendarDayModalContent"),
+      closeCalendarDayModalBtn: document.getElementById("closeCalendarDayModalBtn"),
+
+      deleteConfirmBackdrop: document.getElementById("deleteConfirmBackdrop"),
+      deleteConfirmTitle: document.getElementById("deleteConfirmTitle"),
+      deleteConfirmMessage: document.getElementById("deleteConfirmMessage"),
+      cancelDeleteBtn: document.getElementById("cancelDeleteBtn"),
+      confirmDeleteBtn: document.getElementById("confirmDeleteBtn"),
 
       exportBtn: document.getElementById("exportBtn"),
       importBtn: document.getElementById("importBtn"),
@@ -762,6 +1569,7 @@
       ensureVenmoExists();
       setupEventListeners();
       setDefaultPurchaseDate();
+      setDefaultBillInputs();
       saveData();
       renderAll();
     }
@@ -769,9 +1577,24 @@
     function setupEventListeners() {
       els.prevMonthBtn.addEventListener("click", () => changeMonth(-1));
       els.nextMonthBtn.addEventListener("click", () => changeMonth(1));
+
       els.currentMonthBtn.addEventListener("click", () => {
         state.selectedMonth = getCurrentMonth();
         renderAll();
+      });
+
+      els.accountConfigToggle.addEventListener("click", () => {
+        els.accountConfigMenu.classList.toggle("show");
+        els.accountConfigToggle.classList.toggle("open");
+      });
+
+      els.totalsToggle.addEventListener("click", () => {
+        els.totalsMenu.classList.toggle("show");
+        els.totalsToggle.classList.toggle("open");
+      });
+
+      els.monthTotalsToggle.addEventListener("click", () => {
+        els.monthTotalsPanel.classList.toggle("show");
       });
 
       els.tabs.forEach(tab => {
@@ -781,8 +1604,14 @@
         });
       });
 
+      els.purchaseDate.addEventListener("change", renderDatalists);
+      els.billType.addEventListener("change", syncBillTypeFields);
+
       els.budgetForm.addEventListener("submit", handleBudgetSubmit);
       els.cancelBudgetEditBtn.addEventListener("click", resetBudgetForm);
+
+      els.billForm.addEventListener("submit", handleBillSubmit);
+      els.cancelBillEditBtn.addEventListener("click", resetBillForm);
 
       els.purchaseForm.addEventListener("submit", handlePurchaseSubmit);
       els.cancelPurchaseEditBtn.addEventListener("click", resetPurchaseForm);
@@ -791,13 +1620,151 @@
       els.cancelPaymentEditBtn.addEventListener("click", resetPaymentForm);
 
       els.closeBudgetModalBtn.addEventListener("click", closeBudgetModal);
+
       els.budgetModalBackdrop.addEventListener("click", event => {
         if (event.target === els.budgetModalBackdrop) closeBudgetModal();
+      });
+
+      els.closeCalendarDayModalBtn.addEventListener("click", closeCalendarDayModal);
+      els.calendarDayModalBackdrop.addEventListener("click", event => {
+        if (event.target === els.calendarDayModalBackdrop) closeCalendarDayModal();
+      });
+
+      els.cancelDeleteBtn.addEventListener("click", closeDeleteConfirm);
+      els.confirmDeleteBtn.addEventListener("click", confirmPendingDelete);
+      els.deleteConfirmBackdrop.addEventListener("click", event => {
+        if (event.target === els.deleteConfirmBackdrop) closeDeleteConfirm();
       });
 
       els.exportBtn.addEventListener("click", exportData);
       els.importBtn.addEventListener("click", importData);
       els.resetBtn.addEventListener("click", resetAllData);
+    }
+
+
+    function wireDeleteButtons() {
+      document.querySelectorAll(".js-delete-btn").forEach(button => {
+        button.onclick = event => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const kind = button.dataset.deleteKind;
+          const id = button.dataset.deleteId;
+
+          openDeleteConfirm(kind, id);
+          return false;
+        };
+      });
+    }
+
+    function openDeleteConfirm(kind, id) {
+      if (!kind || !id) {
+        showNotice("Could not identify this item to delete.", "error");
+        return;
+      }
+
+      const warning = getDeleteWarning(kind, id);
+      if (!warning) {
+        showNotice("Could not find this item to delete.", "error");
+        return;
+      }
+
+      state.pendingDelete = { kind, id };
+      els.deleteConfirmMessage.textContent = warning;
+      els.deleteConfirmBackdrop.classList.add("show");
+      els.confirmDeleteBtn.focus();
+    }
+
+    function closeDeleteConfirm() {
+      state.pendingDelete = null;
+      els.deleteConfirmBackdrop.classList.remove("show");
+    }
+
+    function confirmPendingDelete() {
+      if (!state.pendingDelete) {
+        closeDeleteConfirm();
+        return;
+      }
+
+      const { kind, id } = state.pendingDelete;
+      closeDeleteConfirm();
+      performDelete(kind, id);
+    }
+
+    function performDelete(kind, id) {
+      if (kind === "budget") {
+        deleteBudget(id);
+        return;
+      }
+
+      if (kind === "bill") {
+        deleteBill(id);
+        return;
+      }
+
+      if (kind === "purchase") {
+        deletePurchase(id);
+        return;
+      }
+
+      if (kind === "payment") {
+        deletePaymentMethod(id);
+        return;
+      }
+
+      showNotice("Unknown delete type.", "error");
+    }
+
+    function getDeleteWarning(kind, id) {
+      if (kind === "budget") {
+        const budget = state.data.budgets.find(item => item.id === id);
+        if (!budget) return "";
+
+        const affectedPurchases = getPurchasesTrackedByBudget(budget);
+        const purchaseText = affectedPurchases.length === 1 ? "1 purchase" : `${affectedPurchases.length} purchases`;
+
+        return `Delete this budget?\n\n${budget.name}\n\n${purchaseText} with the tag "${budget.tag}" will NOT be deleted. They will be retagged as "untracked" and highlighted yellow in the Purchases tab.`;
+      }
+
+      if (kind === "bill") {
+        const bill = state.data.bills.find(item => item.id === id);
+        if (!bill) return "";
+        return `Delete this bill?\n\n${bill.title}\n${formatCurrency(bill.amount)}\n\nThis will remove it from Bills/Expenses.`;
+      }
+
+      if (kind === "purchase") {
+        const purchase = state.data.purchases.find(item => item.id === id);
+        if (!purchase) return "";
+        return `Delete this purchase?\n\n${purchase.name}\n${formatCurrency(purchase.amount)}\n${purchase.date}\n\nThis cannot be undone.`;
+      }
+
+      if (kind === "payment") {
+        const method = state.data.paymentMethods.find(item => item.id === id);
+        if (!method) return "";
+
+        const tiedPurchases = state.data.purchases.filter(purchase => purchase.paymentMethodId === id).length;
+        let warning = `Delete this MOP?\n\n${method.name}`;
+
+        if (tiedPurchases > 0) {
+          warning += `\n\nWarning: ${tiedPurchases} purchase(s) are tied to this MOP. Those purchases will remain, but they will be highlighted yellow in the Purchases tab until you edit them and choose an active MOP.`;
+        }
+
+        return warning;
+      }
+
+      return "";
+    }
+
+    function getPurchasesTrackedByBudget(budget) {
+      const budgetTag = normalizeTag(budget.tag);
+
+      return state.data.purchases.filter(purchase => {
+        const purchaseMonth = purchase.date.slice(0, 7);
+        const tagMatches = normalizeTag(purchase.tag) === budgetTag;
+        const budgetAppliesToPurchaseMonth = budget.type === "recurring" || purchaseMonth === budget.monthCreated;
+
+        return tagMatches && budgetAppliesToPurchaseMonth;
+      });
     }
 
     function loadData() {
@@ -807,7 +1774,7 @@
 
         const parsed = JSON.parse(raw);
         if (isValidDataShape(parsed)) {
-          state.data = parsed;
+          state.data = normalizeImportedData(parsed);
         }
       } catch {
         showNotice("Could not load saved data. Starting with a blank tracker.", "error");
@@ -838,11 +1805,17 @@
       renderTabs();
       renderDatalists();
       renderPaymentMethodOptions();
+      renderBillPaymentMethodOptions();
       renderDashboard();
       renderBudgets();
+      renderBills();
       renderPurchases();
+      renderPurchaseCalendar();
       renderPaymentMethods();
       renderMopTotals();
+      renderYearTotal();
+      renderMonthTotals();
+      wireDeleteButtons();
     }
 
     function renderMonthColor() {
@@ -867,6 +1840,7 @@
     function renderDashboard() {
       const budgets = getBudgetsForSelectedMonth();
       const purchases = getPurchasesForSelectedMonth();
+      const bills = getBillsForSelectedMonth();
 
       let totalBudgeted = 0;
       let totalSpent = 0;
@@ -882,6 +1856,9 @@
       } else {
         els.duplicateTagWarning.classList.remove("show");
       }
+
+      const billsTotal = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+      els.billsExpensesTotal.textContent = formatCurrency(billsTotal);
 
       if (!budgets.length) {
         els.dashboardBudgetList.innerHTML = `
@@ -902,7 +1879,7 @@
               totalSpent += spent;
 
               return `
-                <article class="budget-card clickable" onclick="openBudgetDetails('${budget.id}')" title="Tap to see purchases">
+                <article class="budget-card" onclick="openBudgetDetails('${jsString(budget.id)}')" title="Tap to see purchases">
                   <div class="budget-head">
                     <div>
                       <div class="budget-name">${escapeHtml(budget.name)}</div>
@@ -950,6 +1927,7 @@
       els.totalBudgeted.textContent = formatCurrency(totalBudgeted);
       els.totalSpent.textContent = formatCurrency(totalSpent);
       els.totalRemaining.textContent = formatCurrency(totalBudgeted - totalSpent);
+      els.totalSpentForMonth.textContent = formatCurrency(billsTotal + totalSpent);
     }
 
     function renderBudgets() {
@@ -961,7 +1939,7 @@
       }
 
       els.budgetList.innerHTML = budgets.map(budget => `
-        <div class="list-item">
+        <div class="list-item" data-kind="budget" data-id="${escapeHtml(budget.id)}">
           <div>
             <div class="item-title">${escapeHtml(budget.name)}</div>
             <div class="item-meta">
@@ -973,12 +1951,57 @@
           </div>
 
           <div class="row-actions">
-            <button type="button" class="ghost" onclick="openBudgetDetails('${budget.id}')">View Purchases</button>
-            <button type="button" class="ghost" onclick="editBudget('${budget.id}')">Edit</button>
-            <button type="button" class="danger" onclick="deleteBudget('${budget.id}')">Delete</button>
+            <button type="button" class="ghost" onclick="openBudgetDetails('${jsString(budget.id)}')">View Purchases</button>
+            <button type="button" class="ghost" onclick="editBudget('${jsString(budget.id)}')">Edit</button>
+            <button type="button" class="danger js-delete-btn" data-delete-kind="budget" data-delete-id="${escapeHtml(budget.id)}">Delete</button>
           </div>
         </div>
       `).join("");
+    }
+
+    function renderBills() {
+      const bills = getBillsForSelectedMonth()
+        .slice()
+        .sort((a, b) => getBillDateForSelectedMonth(a).localeCompare(getBillDateForSelectedMonth(b)));
+
+      if (!bills.length) {
+        els.billList.innerHTML = `<div class="empty">No bills yet for this month.</div>`;
+        return;
+      }
+
+      const total = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+
+      els.billList.innerHTML =
+        `<div class="mop-total-card" style="background:#f8fafc;">
+          <div>
+            <div class="mop-total-name">Bills/Expenses Total</div>
+            <div class="item-meta">${formatMonthLabel(state.selectedMonth)}</div>
+          </div>
+          <div class="mop-total-amount">${formatCurrency(total)}</div>
+        </div>` +
+        bills.map(bill => {
+          const payment = getPaymentMethodById(bill.paymentMethodId);
+          const hasDeletedMop = !payment;
+
+          return `
+            <div class="list-item" data-kind="bill" data-id="${escapeHtml(bill.id)}" ${hasDeletedMop ? `style="background:#fef3c7;border-color:#fde68a;"` : ""}>
+              <div>
+                <div class="item-title">${escapeHtml(bill.title)}</div>
+                <div class="item-meta">
+                  Amount: ${formatCurrency(bill.amount)}<br>
+                  Pay date: ${getBillDateForSelectedMonth(bill)}<br>
+                  MOP: ${payment ? escapeHtml(payment.name) : "Deleted MOP / choose an active MOP"}<br>
+                  Type: ${bill.type === "recurring" ? "Recurring monthly" : "One-time"}
+                </div>
+              </div>
+
+              <div class="row-actions">
+                <button type="button" class="ghost" onclick="editBill('${jsString(bill.id)}')">Edit</button>
+                <button type="button" class="danger js-delete-btn" data-delete-kind="bill" data-delete-id="${escapeHtml(bill.id)}">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join("");
     }
 
     function renderPurchases() {
@@ -993,28 +2016,167 @@
 
       els.purchaseList.innerHTML = purchases.map(purchase => {
         const payment = getPaymentMethodById(purchase.paymentMethodId);
+        const isUntrackedTag = normalizeTag(purchase.tag) === "untracked";
+        const hasDeletedMop = !payment;
+        const needsAttention = isUntrackedTag || hasDeletedMop;
+        const reimbursementClass = Number(purchase.amount) < 0 ? " reimbursement" : "";
+        const untrackedClass = needsAttention ? " untracked" : "";
 
         return `
-          <div class="list-item purchase-list-item">
-            <div>
-              <div class="item-title">${escapeHtml(purchase.name)}</div>
-              <div class="item-meta">
-                Date: ${purchase.date}<br>
-                Tag: ${escapeHtml(purchase.tag)}<br>
-                MOP: ${payment ? escapeHtml(payment.name) : "Deleted MOP"}
+          <details class="purchase-compact${reimbursementClass}${untrackedClass}" data-kind="purchase" data-id="${escapeHtml(purchase.id)}">
+            <summary>
+              <div>
+                <div class="purchase-summary-title">${escapeHtml(purchase.name)}</div>
+                <div class="purchase-summary-date">${purchase.date}</div>
               </div>
-            </div>
+              <div class="purchase-summary-amount">${formatCurrency(purchase.amount)}</div>
+            </summary>
 
-            <div>
-              <div class="item-amount">${formatCurrency(purchase.amount)}</div>
-              <div class="row-actions" style="margin-top: 10px;">
-                <button type="button" class="ghost" onclick="editPurchase('${purchase.id}')">Edit</button>
-                <button type="button" class="danger" onclick="deletePurchase('${purchase.id}')">Delete</button>
+            <div class="purchase-expanded">
+              <div class="purchase-expanded-grid">
+                <div><strong>Tag:</strong> ${escapeHtml(purchase.tag)}</div>
+                <div><strong>MOP:</strong> ${payment ? escapeHtml(payment.name) : "Deleted MOP"}</div>
+                ${isUntrackedTag ? `<div><strong>Needs attention:</strong> Choose an active budget tag.</div>` : ""}
+                ${hasDeletedMop ? `<div><strong>Needs attention:</strong> Choose an active MOP.</div>` : ""}
+                ${Number(purchase.amount) < 0 ? `<div><strong>Type:</strong> Payback / refund / reimbursement</div>` : ""}
+              </div>
+
+              <div class="row-actions">
+                <button type="button" class="ghost" onclick="editPurchase('${jsString(purchase.id)}')">Edit</button>
+                <button type="button" class="danger js-delete-btn" data-delete-kind="purchase" data-delete-id="${escapeHtml(purchase.id)}">Delete</button>
               </div>
             </div>
-          </div>
+          </details>
         `;
       }).join("");
+    }
+
+    function renderPurchaseCalendar() {
+      if (!els.purchaseCalendar || !els.purchaseCalendarMonthLabel) return;
+
+      els.purchaseCalendarMonthLabel.textContent = formatMonthLabel(state.selectedMonth);
+
+      const [year, month] = state.selectedMonth.split("-").map(Number);
+      const firstOfMonth = new Date(year, month - 1, 1);
+      const startDate = new Date(year, month - 1, 1 - firstOfMonth.getDay());
+      const todayValue = toDateInputValue(new Date());
+      const purchases = getPurchasesForSelectedMonth().slice().sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return Number(b.amount) - Number(a.amount);
+      });
+
+      const purchasesByDate = new Map();
+      purchases.forEach(purchase => {
+        if (!purchasesByDate.has(purchase.date)) purchasesByDate.set(purchase.date, []);
+        purchasesByDate.get(purchase.date).push(purchase);
+      });
+
+      const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const weekdayHtml = weekdayLabels
+        .map(label => `<div class="calendar-weekday">${label}</div>`)
+        .join("");
+
+      const dayHtml = Array.from({ length: 42 }, (_, index) => {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + index);
+
+        const dateValue = toDateInputValue(date);
+        const inSelectedMonth = dateValue.slice(0, 7) === state.selectedMonth;
+        const dayPurchases = inSelectedMonth ? (purchasesByDate.get(dateValue) || []) : [];
+        const dayTotal = dayPurchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+        const classes = ["calendar-day"];
+
+        if (!inSelectedMonth) classes.push("outside-month");
+        if (dateValue === todayValue) classes.push("today");
+        if (dayPurchases.length) classes.push("has-purchases");
+
+        const dayContent = `
+          <div class="calendar-day-head">
+            <div class="calendar-day-number">${date.getDate()}</div>
+            ${dayPurchases.length ? `<div class="calendar-day-count" aria-label="${dayPurchases.length} purchase(s)">${dayPurchases.length}</div>` : ""}
+          </div>
+          ${dayPurchases.length ? `
+            <div class="calendar-day-summary">
+              <div>${dayPurchases.length} purchase${dayPurchases.length === 1 ? "" : "s"}</div>
+              <div class="calendar-day-total">${formatCurrency(dayTotal)}</div>
+            </div>
+          ` : `<div></div>`}
+        `;
+
+        if (!dayPurchases.length) {
+          return `<div class="${classes.join(" ")}">${dayContent}</div>`;
+        }
+
+        return `
+          <button type="button" class="${classes.join(" ")}" onclick="openCalendarDayDetails('${dateValue}')" title="View purchases for ${dateValue}">
+            ${dayContent}
+          </button>
+        `;
+      }).join("");
+
+      const total = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+
+      els.purchaseCalendar.innerHTML = `
+        <div class="monthly-grand-total" style="margin-top:0;">
+          <div>
+            <div class="label">Calendar Purchases</div>
+            <div class="muted small">${purchases.length} purchase(s) logged in ${formatMonthLabel(state.selectedMonth)}</div>
+          </div>
+          <div class="value">${formatCurrency(total)}</div>
+        </div>
+        <div class="calendar-grid">
+          ${weekdayHtml}
+          ${dayHtml}
+        </div>
+      `;
+    }
+
+    function openCalendarDayDetails(dateValue) {
+      const purchases = getPurchasesForSelectedMonth()
+        .filter(purchase => purchase.date === dateValue)
+        .sort((a, b) => Math.abs(Number(b.amount)) - Math.abs(Number(a.amount)) || a.name.localeCompare(b.name));
+
+      if (!purchases.length) return;
+
+      const dayTotal = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      const label = new Date(dateValue + "T00:00:00").toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      });
+
+      els.calendarDayModalTitle.textContent = label;
+      els.calendarDayModalSubtitle.textContent = `${purchases.length} purchase(s) · ${formatCurrency(dayTotal)} total · Sorted by cost`;
+
+      els.calendarDayModalContent.innerHTML = `
+        <div class="list">
+          ${purchases.map(purchase => {
+            const payment = getPaymentMethodById(purchase.paymentMethodId);
+            const isReimbursement = Number(purchase.amount) < 0;
+            const needsAttention = normalizeTag(purchase.tag) === "untracked" || !payment;
+
+            return `
+              <div class="list-item" ${needsAttention ? `style="background:#fef3c7;border-color:#facc15;"` : isReimbursement ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
+                <div>
+                  <div class="item-title">${escapeHtml(purchase.name)}</div>
+                  <div class="item-meta">
+                    Tag: ${escapeHtml(purchase.tag)}<br>
+                    MOP: ${payment ? escapeHtml(payment.name) : "Choose an active MOP"}
+                  </div>
+                </div>
+                <div class="item-amount">${formatCurrency(purchase.amount)}</div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      els.calendarDayModalBackdrop.classList.add("show");
+    }
+
+    function closeCalendarDayModal() {
+      els.calendarDayModalBackdrop.classList.remove("show");
     }
 
     function renderPaymentMethods() {
@@ -1029,7 +2191,7 @@
         const useCount = state.data.purchases.filter(p => p.paymentMethodId === method.id).length;
 
         return `
-          <div class="list-item">
+          <div class="list-item" data-kind="payment" data-id="${escapeHtml(method.id)}">
             <div>
               <div class="item-title">${escapeHtml(method.name)}</div>
               <div class="item-meta">
@@ -1039,8 +2201,8 @@
             </div>
 
             <div class="row-actions">
-              <button type="button" class="ghost" onclick="editPaymentMethod('${method.id}')">Edit</button>
-              <button type="button" class="danger" onclick="deletePaymentMethod('${method.id}')">Delete</button>
+              <button type="button" class="ghost" onclick="editPaymentMethod('${jsString(method.id)}')">Edit</button>
+              <button type="button" class="danger js-delete-btn" data-delete-kind="payment" data-delete-id="${escapeHtml(method.id)}">Delete</button>
             </div>
           </div>
         `;
@@ -1049,6 +2211,7 @@
 
     function renderMopTotals() {
       const purchases = getPurchasesForSelectedMonth();
+      const bills = getBillsForSelectedMonth();
       els.mopTotalsMonthLabel.textContent = formatMonthLabel(state.selectedMonth);
 
       const totalsByMethod = new Map();
@@ -1057,33 +2220,48 @@
         totalsByMethod.set(method.id, {
           method,
           total: 0,
-          count: 0
+          purchaseCount: 0,
+          billCount: 0
         });
       });
 
       let deletedTotal = 0;
-      let deletedCount = 0;
+      let deletedPurchaseCount = 0;
+      let deletedBillCount = 0;
 
       purchases.forEach(purchase => {
         const record = totalsByMethod.get(purchase.paymentMethodId);
 
         if (record) {
           record.total += Number(purchase.amount);
-          record.count += 1;
+          record.purchaseCount += 1;
         } else {
           deletedTotal += Number(purchase.amount);
-          deletedCount += 1;
+          deletedPurchaseCount += 1;
+        }
+      });
+
+      bills.forEach(bill => {
+        const record = totalsByMethod.get(bill.paymentMethodId);
+
+        if (record) {
+          record.total += Number(bill.amount);
+          record.billCount += 1;
+        } else {
+          deletedTotal += Number(bill.amount);
+          deletedBillCount += 1;
         }
       });
 
       const rows = Array.from(totalsByMethod.values())
-        .filter(record => record.count > 0 || record.method.name.toLowerCase() === "venmo")
+        .filter(record => record.purchaseCount > 0 || record.billCount > 0 || record.method.name.toLowerCase() === "venmo")
         .sort((a, b) => b.total - a.total);
 
-      const grandTotal = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      const grandTotal = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0) +
+        bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
 
-      if (!purchases.length) {
-        els.mopTotalsList.innerHTML = `<div class="empty">No purchases yet for this month.</div>`;
+      if (!purchases.length && !bills.length) {
+        els.mopTotalsList.innerHTML = `<div class="empty">No purchases or bills yet for this month.</div>`;
         return;
       }
 
@@ -1092,16 +2270,16 @@
           <div class="mop-total-card">
             <div>
               <div class="mop-total-name">${escapeHtml(record.method.name)}</div>
-              <div class="item-meta">${escapeHtml(record.method.type || "Other")} · ${record.count} purchase(s)</div>
+              <div class="item-meta">${escapeHtml(record.method.type || "Other")} · ${record.purchaseCount} purchase(s) · ${record.billCount} bill(s)</div>
             </div>
             <div class="mop-total-amount">${formatCurrency(record.total)}</div>
           </div>
         `).join("") +
-        (deletedCount
-          ? `<div class="mop-total-card">
+        (deletedPurchaseCount || deletedBillCount
+          ? `<div class="mop-total-card" style="background:#fef3c7;border-color:#fde68a;">
               <div>
                 <div class="mop-total-name">Deleted MOP</div>
-                <div class="item-meta">${deletedCount} purchase(s)</div>
+                <div class="item-meta">${deletedPurchaseCount} purchase(s) · ${deletedBillCount} bill(s)</div>
               </div>
               <div class="mop-total-amount">${formatCurrency(deletedTotal)}</div>
             </div>`
@@ -1109,18 +2287,179 @@
         `<div class="mop-total-card" style="background:#f8fafc;">
           <div>
             <div class="mop-total-name">Monthly Total</div>
-            <div class="item-meta">All MOPs</div>
+            <div class="item-meta">Purchases + Bills/Expenses by MOP</div>
           </div>
           <div class="mop-total-amount">${formatCurrency(grandTotal)}</div>
         </div>`;
     }
 
-    function renderDatalists() {
-      const tags = getAllBudgetTags();
-      const options = tags.map(tag => `<option value="${escapeHtml(tag)}"></option>`).join("");
+    function renderYearTotal() {
+      const selectedYear = state.selectedMonth.slice(0, 4);
+      els.yearTotalYearLabel.textContent = selectedYear;
 
-      els.budgetTagOptions.innerHTML = options;
-      els.purchaseTagOptions.innerHTML = options;
+      const purchases = state.data.purchases.filter(purchase => purchase.date.slice(0, 4) === selectedYear);
+      const totals = new Map();
+
+      purchases.forEach(purchase => {
+        const key = normalizeTag(purchase.tag);
+
+        if (!totals.has(key)) {
+          totals.set(key, {
+            tag: purchase.tag,
+            total: 0,
+            count: 0,
+            kind: "purchase"
+          });
+        }
+
+        const record = totals.get(key);
+        record.total += Number(purchase.amount);
+        record.count += 1;
+      });
+
+      const billsTotal = getBillsForYear(selectedYear).reduce((sum, bill) => sum + Number(bill.amount), 0);
+      const billsCount = getBillsForYear(selectedYear).length;
+
+      if (billsCount > 0) {
+        totals.set("__bills_expenses__", {
+          tag: "Bills/Expenses",
+          total: billsTotal,
+          count: billsCount,
+          kind: "bill"
+        });
+      }
+
+      const rows = Array.from(totals.values()).sort((a, b) => b.total - a.total);
+      const grandTotal = rows.reduce((sum, row) => sum + row.total, 0);
+
+      const positiveRows = rows.filter(row => row.total > 0);
+      const positiveTotal = positiveRows.reduce((sum, row) => sum + row.total, 0);
+
+      if (!rows.length) {
+        els.yearPieChart.style.background = "conic-gradient(#e5e7eb 0deg 360deg)";
+        els.yearTotalList.innerHTML = `<div class="empty">No purchases or bills yet for ${selectedYear}.</div>`;
+        return;
+      }
+
+      if (!positiveRows.length) {
+        els.yearPieChart.style.background = "conic-gradient(#bbf7d0 0deg 360deg)";
+      } else {
+        let currentDegree = 0;
+
+        const segments = positiveRows.map((row, index) => {
+          const degrees = positiveTotal > 0 ? (row.total / positiveTotal) * 360 : 0;
+          const start = currentDegree;
+          const end = currentDegree + degrees;
+          currentDegree = end;
+          return `${PIE_COLORS[index % PIE_COLORS.length]} ${start}deg ${end}deg`;
+        });
+
+        els.yearPieChart.style.background = `conic-gradient(${segments.join(", ")})`;
+      }
+
+      els.yearTotalList.innerHTML =
+        rows.map((row, index) => {
+          const percent = positiveTotal > 0 && row.total > 0 ? (row.total / positiveTotal) * 100 : 0;
+          const countLabel = row.kind === "bill" ? `${row.count} bill occurrence(s)` : `${row.count} purchase(s)`;
+
+          return `
+            <div class="year-total-card" ${row.total < 0 ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
+              <div>
+                <div class="legend-row">
+                  <span class="legend-color" style="background:${row.total < 0 ? "#bbf7d0" : PIE_COLORS[index % PIE_COLORS.length]}"></span>
+                  <span class="year-total-name">${escapeHtml(row.tag)}</span>
+                  <span>${row.total > 0 ? formatPercent(percent) : "Payback"}</span>
+                </div>
+                <div class="item-meta">${countLabel}</div>
+              </div>
+              <div class="year-total-amount">${formatCurrency(row.total)}</div>
+            </div>
+          `;
+        }).join("") +
+        `<div class="year-total-card" style="background:#f8fafc;">
+          <div>
+            <div class="year-total-name">Year Total</div>
+            <div class="item-meta">Budget spending + Bills/Expenses</div>
+          </div>
+          <div class="year-total-amount">${formatCurrency(grandTotal)}</div>
+        </div>`;
+    }
+
+    function renderMonthTotals() {
+      const selectedYear = state.selectedMonth.slice(0, 4);
+      const months = Array.from({ length: 12 }, (_, index) => {
+        const monthNumber = String(index + 1).padStart(2, "0");
+        const yearMonth = `${selectedYear}-${monthNumber}`;
+        const label = new Date(Number(selectedYear), index, 1).toLocaleDateString(undefined, {
+          month: "long"
+        });
+
+        const purchaseTotal = state.data.purchases
+          .filter(purchase => purchase.date.slice(0, 7) === yearMonth)
+          .reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+
+        const billsTotal = getBillsForMonth(yearMonth)
+          .reduce((sum, bill) => sum + Number(bill.amount), 0);
+
+        const total = purchaseTotal + billsTotal;
+
+        return {
+          label,
+          yearMonth,
+          purchaseTotal,
+          billsTotal,
+          total
+        };
+      });
+
+      const yearlyTotal = months.reduce((sum, month) => sum + month.total, 0);
+
+      els.monthTotalsPanel.innerHTML =
+        months.map(month => `
+          <div class="month-total-card" ${month.total < 0 ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
+            <div>
+              <div class="month-total-name">${month.label}</div>
+              <div class="item-meta">${month.yearMonth} · Purchases: ${formatCurrency(month.purchaseTotal)} · Bills: ${formatCurrency(month.billsTotal)}</div>
+            </div>
+            <div class="month-total-amount">${formatCurrency(month.total)}</div>
+          </div>
+        `).join("") +
+        `<div class="month-total-card" style="background:#f8fafc;">
+          <div>
+            <div class="month-total-name">Calendar Year Total</div>
+            <div class="item-meta">January through December · Purchases + Bills/Expenses</div>
+          </div>
+          <div class="month-total-amount">${formatCurrency(yearlyTotal)}</div>
+        </div>`;
+    }
+
+    function renderDatalists() {
+      const purchaseMonth = els.purchaseDate.value && isValidDate(els.purchaseDate.value)
+        ? els.purchaseDate.value.slice(0, 7)
+        : state.selectedMonth;
+
+      const selectedMonthTags = getBudgetTagsForMonth(state.selectedMonth);
+      const purchaseMonthTags = getBudgetTagsForMonth(purchaseMonth);
+
+      els.budgetTagOptions.innerHTML = selectedMonthTags
+        .map(tag => `<option value="${escapeHtml(tag)}"></option>`)
+        .join("");
+
+      if (els.purchaseTagOptions) {
+        els.purchaseTagOptions.innerHTML = purchaseMonthTags
+          .map(tag => `<option value="${escapeHtml(tag)}"></option>`)
+          .join("");
+      }
+
+      if (!purchaseMonthTags.length) {
+        els.purchaseTag.innerHTML = `<option value="">Add a budget tag first</option>`;
+        els.purchaseTag.disabled = true;
+      } else {
+        els.purchaseTag.disabled = false;
+        els.purchaseTag.innerHTML =
+          `<option value="">Select a budget tag</option>` +
+          purchaseMonthTags.map(tag => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`).join("");
+      }
     }
 
     function renderPaymentMethodOptions() {
@@ -1134,7 +2473,22 @@
       els.purchasePaymentMethod.innerHTML =
         `<option value="">Select a MOP</option>` +
         state.data.paymentMethods.map(method => `
-          <option value="${method.id}">${escapeHtml(method.name)}${method.type ? " · " + escapeHtml(method.type) : ""}</option>
+          <option value="${escapeHtml(method.id)}">${escapeHtml(method.name)}${method.type ? " · " + escapeHtml(method.type) : ""}</option>
+        `).join("");
+    }
+
+    function renderBillPaymentMethodOptions() {
+      if (!state.data.paymentMethods.length) {
+        els.billPaymentMethod.innerHTML = `<option value="">Add a MOP first</option>`;
+        els.billPaymentMethod.disabled = true;
+        return;
+      }
+
+      els.billPaymentMethod.disabled = false;
+      els.billPaymentMethod.innerHTML =
+        `<option value="">Select a MOP</option>` +
+        state.data.paymentMethods.map(method => `
+          <option value="${escapeHtml(method.id)}">${escapeHtml(method.name)}${method.type ? " · " + escapeHtml(method.type) : ""}</option>
         `).join("");
     }
 
@@ -1143,10 +2497,10 @@
       if (!budget) return;
 
       const purchases = getPurchasesForSelectedMonth()
-        .filter(p => normalizeTag(p.tag) === normalizeTag(budget.tag))
+        .filter(purchase => normalizeTag(purchase.tag) === normalizeTag(budget.tag))
         .sort((a, b) => b.date.localeCompare(a.date));
 
-      const spent = purchases.reduce((sum, p) => sum + Number(p.amount), 0);
+      const spent = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
       const remaining = Number(budget.amount) - spent;
 
       els.budgetModalTitle.textContent = budget.name;
@@ -1163,7 +2517,7 @@
               const payment = getPaymentMethodById(purchase.paymentMethodId);
 
               return `
-                <div class="list-item purchase-list-item">
+                <div class="list-item" ${Number(purchase.amount) < 0 ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
                   <div>
                     <div class="item-title">${escapeHtml(purchase.name)}</div>
                     <div class="item-meta">
@@ -1227,7 +2581,7 @@
 
     function editBudget(id) {
       const budget = state.data.budgets.find(b => b.id === id);
-      if (!budget) return;
+      if (!budget) return showNotice("Budget not found.", "error");
 
       state.activeTab = "budgets";
       els.budgetFormTitle.textContent = "Edit Budget";
@@ -1243,16 +2597,25 @@
     }
 
     function deleteBudget(id) {
-      const budget = state.data.budgets.find(b => b.id === id);
-      if (!budget) return;
+      const budget = state.data.budgets.find(item => item.id === id);
 
-      if (!confirm(`Delete the budget "${budget.name}"? Purchases will not be deleted.`)) return;
+      if (!budget) {
+        showNotice("Budget not found.", "error");
+        return;
+      }
 
-      state.data.budgets = state.data.budgets.filter(b => b.id !== id);
+      const affectedPurchases = getPurchasesTrackedByBudget(budget);
+      affectedPurchases.forEach(purchase => {
+        purchase.tag = "untracked";
+      });
+
+      state.data.budgets = state.data.budgets.filter(item => item.id !== id);
       saveData();
       resetBudgetForm();
       renderAll();
-      showNotice("Budget deleted.", "success");
+
+      const purchaseText = affectedPurchases.length === 1 ? "1 purchase" : `${affectedPurchases.length} purchases`;
+      showNotice(`Budget deleted: ${budget.name}. ${purchaseText} retagged as untracked.`, "success");
     }
 
     function resetBudgetForm() {
@@ -1263,22 +2626,149 @@
       els.cancelBudgetEditBtn.classList.add("hidden");
     }
 
+    function handleBillSubmit(event) {
+      event.preventDefault();
+
+      const id = els.billId.value;
+      const title = els.billTitle.value.trim();
+      const amount = Number(els.billAmount.value);
+      const paymentMethodId = els.billPaymentMethod.value;
+      const type = els.billType.value;
+      const day = Number(els.billDay.value);
+      const date = els.billDate.value;
+
+      if (!title) return showNotice("Bill title is required.", "error");
+      if (!Number.isFinite(amount) || amount <= 0) return showNotice("Bill amount must be greater than 0.", "error");
+      if (!paymentMethodId) return showNotice("MOP is required for bills.", "error");
+      if (!getPaymentMethodById(paymentMethodId)) return showNotice("Selected bill MOP is invalid.", "error");
+      if (!["recurring", "one-time"].includes(type)) return showNotice("Bill type is invalid.", "error");
+
+      let billDate = date;
+      let billDay = null;
+
+      if (type === "recurring") {
+        if (!Number.isInteger(day) || day < 1 || day > 31) {
+          return showNotice("Recurring bill day must be between 1 and 31.", "error");
+        }
+
+        billDay = day;
+        billDate = `${state.selectedMonth}-${String(Math.min(day, getDaysInMonth(state.selectedMonth))).padStart(2, "0")}`;
+      } else {
+        if (!isValidDate(date)) return showNotice("Bill date is invalid.", "error");
+        billDay = Number(date.slice(8, 10));
+      }
+
+      if (id) {
+        const bill = state.data.bills.find(b => b.id === id);
+        if (!bill) return showNotice("Bill not found.", "error");
+
+        bill.title = title;
+        bill.amount = roundMoney(amount);
+        bill.paymentMethodId = paymentMethodId;
+        bill.date = billDate;
+        bill.day = billDay;
+        bill.type = type;
+      } else {
+        state.data.bills.push({
+          id: createId(),
+          title,
+          amount: roundMoney(amount),
+          paymentMethodId,
+          date: billDate,
+          day: billDay,
+          type
+        });
+      }
+
+      saveData();
+      resetBillForm();
+      renderAll();
+      showNotice(id ? "Bill updated." : "Bill added.", "success");
+    }
+
+    function editBill(id) {
+      const bill = state.data.bills.find(b => b.id === id);
+      if (!bill) return showNotice("Bill not found.", "error");
+
+      state.activeTab = "bills";
+      els.billFormTitle.textContent = "Edit Bill";
+      els.billId.value = bill.id;
+      els.billTitle.value = bill.title;
+      renderBillPaymentMethodOptions();
+      els.billAmount.value = bill.amount;
+      els.billPaymentMethod.value = bill.paymentMethodId || "";
+      els.billType.value = bill.type;
+      els.billDay.value = bill.day || Number(bill.date.slice(8, 10));
+      els.billDate.value = bill.date;
+      els.cancelBillEditBtn.classList.remove("hidden");
+      syncBillTypeFields();
+
+      renderTabs();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteBill(id) {
+      const bill = state.data.bills.find(item => item.id === id);
+
+      if (!bill) {
+        showNotice("Bill not found.", "error");
+        return;
+      }
+
+      state.data.bills = state.data.bills.filter(item => item.id !== id);
+      saveData();
+      resetBillForm();
+      renderAll();
+      showNotice(`Bill deleted: ${bill.title}`, "success");
+    }
+
+    function resetBillForm() {
+      els.billForm.reset();
+      els.billId.value = "";
+      els.billType.value = "recurring";
+      els.billFormTitle.textContent = "Add Bill";
+      els.cancelBillEditBtn.classList.add("hidden");
+      renderBillPaymentMethodOptions();
+      setDefaultBillInputs();
+      syncBillTypeFields();
+    }
+
+    function syncBillTypeFields() {
+      const isRecurring = els.billType.value === "recurring";
+      els.billRecurringDayWrap.classList.toggle("hidden", !isRecurring);
+      els.billOneTimeDateWrap.classList.toggle("hidden", isRecurring);
+    }
+
     function handlePurchaseSubmit(event) {
       event.preventDefault();
 
       const id = els.purchaseId.value;
       const name = els.purchaseName.value.trim();
       const amount = Number(els.purchaseAmount.value);
-      const tag = els.purchaseTag.value.trim();
+      const enteredTag = els.purchaseTag.value.trim();
       const paymentMethodId = els.purchasePaymentMethod.value;
       const date = els.purchaseDate.value;
 
       if (!name) return showNotice("Purchase name is required.", "error");
-      if (!Number.isFinite(amount) || amount <= 0) return showNotice("Purchase amount must be greater than 0.", "error");
-      if (!tag) return showNotice("Purchase tag is required.", "error");
+
+      if (!Number.isFinite(amount) || amount === 0) {
+        return showNotice("Purchase amount cannot be 0. Use a positive amount for spending or a negative amount for paybacks/refunds.", "error");
+      }
+
+      if (!enteredTag) return showNotice("Purchase tag is required.", "error");
       if (!paymentMethodId) return showNotice("MOP is required.", "error");
       if (!getPaymentMethodById(paymentMethodId)) return showNotice("Selected MOP is invalid.", "error");
       if (!isValidDate(date)) return showNotice("Purchase date is invalid.", "error");
+
+      const purchaseMonth = date.slice(0, 7);
+      const matchingTag = getMatchingBudgetTagForMonth(enteredTag, purchaseMonth);
+
+      if (!matchingTag) {
+        return showNotice(
+          `Purchase tag must match an existing budget tag for ${formatMonthLabel(purchaseMonth)}. Add a budget with this tag first, or choose one from the budget tag dropdown.`,
+          "error"
+        );
+      }
 
       if (id) {
         const purchase = state.data.purchases.find(p => p.id === id);
@@ -1286,7 +2776,7 @@
 
         purchase.name = name;
         purchase.amount = roundMoney(amount);
-        purchase.tag = tag;
+        purchase.tag = matchingTag;
         purchase.paymentMethodId = paymentMethodId;
         purchase.date = date;
       } else {
@@ -1294,7 +2784,7 @@
           id: createId(),
           name,
           amount: roundMoney(amount),
-          tag,
+          tag: matchingTag,
           paymentMethodId,
           date
         });
@@ -1308,18 +2798,22 @@
 
     function editPurchase(id) {
       const purchase = state.data.purchases.find(p => p.id === id);
-      if (!purchase) return;
+      if (!purchase) return showNotice("Purchase not found.", "error");
 
       state.activeTab = "purchases";
-      renderPaymentMethodOptions();
 
       els.purchaseFormTitle.textContent = "Edit Purchase";
       els.purchaseId.value = purchase.id;
       els.purchaseName.value = purchase.name;
       els.purchaseAmount.value = purchase.amount;
-      els.purchaseTag.value = purchase.tag;
-      els.purchasePaymentMethod.value = purchase.paymentMethodId;
       els.purchaseDate.value = purchase.date;
+
+      renderDatalists();
+      renderPaymentMethodOptions();
+
+      const matchingTag = getMatchingBudgetTagForMonth(purchase.tag, purchase.date.slice(0, 7));
+      els.purchaseTag.value = matchingTag || "";
+      els.purchasePaymentMethod.value = getPaymentMethodById(purchase.paymentMethodId) ? purchase.paymentMethodId : "";
       els.cancelPurchaseEditBtn.classList.remove("hidden");
 
       renderTabs();
@@ -1327,16 +2821,18 @@
     }
 
     function deletePurchase(id) {
-      const purchase = state.data.purchases.find(p => p.id === id);
-      if (!purchase) return;
+      const purchase = state.data.purchases.find(item => item.id === id);
 
-      if (!confirm(`Delete the purchase "${purchase.name}"?`)) return;
+      if (!purchase) {
+        showNotice("Purchase not found.", "error");
+        return;
+      }
 
-      state.data.purchases = state.data.purchases.filter(p => p.id !== id);
+      state.data.purchases = state.data.purchases.filter(item => item.id !== id);
       saveData();
       resetPurchaseForm();
       renderAll();
-      showNotice("Purchase deleted.", "success");
+      showNotice(`Purchase deleted: ${purchase.name}`, "success");
     }
 
     function resetPurchaseForm() {
@@ -1344,8 +2840,9 @@
       els.purchaseId.value = "";
       els.purchaseFormTitle.textContent = "Add Purchase";
       els.cancelPurchaseEditBtn.classList.add("hidden");
-      renderPaymentMethodOptions();
       setDefaultPurchaseDate();
+      renderDatalists();
+      renderPaymentMethodOptions();
     }
 
     function handlePaymentSubmit(event) {
@@ -1379,7 +2876,7 @@
 
     function editPaymentMethod(id) {
       const method = state.data.paymentMethods.find(m => m.id === id);
-      if (!method) return;
+      if (!method) return showNotice("MOP not found.", "error");
 
       state.activeTab = "paymentMethods";
       els.paymentFormTitle.textContent = "Edit MOP";
@@ -1393,23 +2890,23 @@
     }
 
     function deletePaymentMethod(id) {
-      const method = state.data.paymentMethods.find(m => m.id === id);
-      if (!method) return;
+      const method = state.data.paymentMethods.find(item => item.id === id);
 
-      const tiedPurchases = state.data.purchases.filter(p => p.paymentMethodId === id).length;
-
-      let message = `Delete the MOP "${method.name}"?`;
-      if (tiedPurchases > 0) {
-        message += `\n\nWarning: ${tiedPurchases} purchase(s) are tied to this MOP. They will remain, but will show as using a deleted MOP.`;
+      if (!method) {
+        showNotice("MOP not found.", "error");
+        return;
       }
 
-      if (!confirm(message)) return;
+      const tiedPurchases = state.data.purchases.filter(purchase => purchase.paymentMethodId === id).length;
+      const tiedBills = state.data.bills.filter(bill => bill.paymentMethodId === id).length;
 
-      state.data.paymentMethods = state.data.paymentMethods.filter(m => m.id !== id);
+      state.data.paymentMethods = state.data.paymentMethods.filter(item => item.id !== id);
       saveData();
       resetPaymentForm();
       renderAll();
-      showNotice("MOP deleted.", "success");
+
+      const affectedText = `${tiedPurchases} purchase(s) and ${tiedBills} bill(s) now need an active MOP.`;
+      showNotice((tiedPurchases || tiedBills) ? `MOP deleted: ${method.name}. ${affectedText}` : `MOP deleted: ${method.name}.`, "success");
     }
 
     function resetPaymentForm() {
@@ -1422,7 +2919,7 @@
     function exportData() {
       const exportPayload = {
         app: "Monthly Budget Tracker",
-        version: 2,
+        version: 14,
         exportedAt: new Date().toISOString(),
         data: state.data
       };
@@ -1459,7 +2956,7 @@
           const importedData = parsed.data && isValidDataShape(parsed.data) ? parsed.data : parsed;
 
           if (!isValidDataShape(importedData)) {
-            showNotice("Invalid import file. Expected budgets, purchases, and paymentMethods arrays.", "error");
+            showNotice("Invalid import file. Expected budgets, purchases, paymentMethods, and optional bills arrays.", "error");
             return;
           }
 
@@ -1469,6 +2966,7 @@
           ensureVenmoExists();
           saveData();
           resetBudgetForm();
+          resetBillForm();
           resetPurchaseForm();
           resetPaymentForm();
           els.importFile.value = "";
@@ -1483,17 +2981,19 @@
     }
 
     function resetAllData() {
-      if (!confirm("Reset all data? This permanently deletes all budgets, purchases, and MOPs stored in this browser.")) return;
+      if (!confirm("Reset all data? This permanently deletes all budgets, purchases, MOPs, and bills stored in this browser.")) return;
 
       state.data = {
         budgets: [],
         purchases: [],
-        paymentMethods: []
+        paymentMethods: [],
+        bills: []
       };
 
       ensureVenmoExists();
       saveData();
       resetBudgetForm();
+      resetBillForm();
       resetPurchaseForm();
       resetPaymentForm();
       renderAll();
@@ -1507,9 +3007,51 @@
     }
 
     function getBudgetsForSelectedMonth() {
+      return getBudgetsForMonth(state.selectedMonth);
+    }
+
+    function getBudgetsForMonth(yearMonth) {
       return state.data.budgets.filter(budget => {
-        return budget.type === "recurring" || budget.monthCreated === state.selectedMonth;
+        return budget.type === "recurring" || budget.monthCreated === yearMonth;
       });
+    }
+
+    function getBillsForSelectedMonth() {
+      return getBillsForMonth(state.selectedMonth);
+    }
+
+    function getBillsForMonth(yearMonth) {
+      return state.data.bills.filter(bill => {
+        return bill.type === "recurring" || bill.date.slice(0, 7) === yearMonth;
+      });
+    }
+
+    function getBillsForYear(year) {
+      const bills = [];
+
+      for (let monthIndex = 1; monthIndex <= 12; monthIndex += 1) {
+        const yearMonth = `${year}-${String(monthIndex).padStart(2, "0")}`;
+        getBillsForMonth(yearMonth).forEach(bill => {
+          bills.push({
+            ...bill,
+            effectiveDate: getBillDateForMonth(bill, yearMonth)
+          });
+        });
+      }
+
+      return bills;
+    }
+
+    function getBillDateForSelectedMonth(bill) {
+      return getBillDateForMonth(bill, state.selectedMonth);
+    }
+
+    function getBillDateForMonth(bill, yearMonth) {
+      if (bill.type !== "recurring") return bill.date;
+
+      const rawDay = bill.day || Number(bill.date.slice(8, 10));
+      const day = String(Math.min(Number(rawDay), getDaysInMonth(yearMonth))).padStart(2, "0");
+      return `${yearMonth}-${day}`;
     }
 
     function getPurchasesForSelectedMonth() {
@@ -1521,8 +3063,10 @@
     function getSpentForBudget(budget, purchases) {
       const tag = normalizeTag(budget.tag);
 
-      return purchases.reduce((sum, p) => {
-        return normalizeTag(p.tag) === tag ? sum + Number(p.amount) : sum;
+      return purchases.reduce((sum, purchase) => {
+        return normalizeTag(purchase.tag) === tag
+          ? sum + Number(purchase.amount)
+          : sum;
       }, 0);
     }
 
@@ -1550,31 +3094,41 @@
     function getDuplicateBudgetTags(budgets) {
       const counts = new Map();
 
-      budgets.forEach(b => {
-        counts.set(normalizeTag(b.tag), (counts.get(normalizeTag(b.tag)) || 0) + 1);
+      budgets.forEach(budget => {
+        counts.set(normalizeTag(budget.tag), (counts.get(normalizeTag(budget.tag)) || 0) + 1);
       });
 
       const duplicates = [];
 
       counts.forEach((count, normalizedTag) => {
         if (count > 1) {
-          duplicates.push(budgets.find(b => normalizeTag(b.tag) === normalizedTag)?.tag || normalizedTag);
+          duplicates.push(budgets.find(budget => normalizeTag(budget.tag) === normalizedTag)?.tag || normalizedTag);
         }
       });
 
       return duplicates;
     }
 
-    function getAllBudgetTags() {
+    function getBudgetTagsForMonth(yearMonth) {
       const map = new Map();
 
-      state.data.budgets.forEach(b => {
-        if (!map.has(normalizeTag(b.tag))) {
-          map.set(normalizeTag(b.tag), b.tag);
+      getBudgetsForMonth(yearMonth).forEach(budget => {
+        const normalized = normalizeTag(budget.tag);
+
+        if (!map.has(normalized)) {
+          map.set(normalized, budget.tag);
         }
       });
 
       return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
+    }
+
+    function getMatchingBudgetTagForMonth(enteredTag, yearMonth) {
+      const normalizedEnteredTag = normalizeTag(enteredTag);
+
+      return getBudgetTagsForMonth(yearMonth).find(tag => {
+        return normalizeTag(tag) === normalizedEnteredTag;
+      }) || null;
     }
 
     function getPaymentMethodById(id) {
@@ -1583,59 +3137,82 @@
 
     function isValidDataShape(value) {
       if (!value || typeof value !== "object") return false;
-      if (!Array.isArray(value.budgets) || !Array.isArray(value.purchases) || !Array.isArray(value.paymentMethods)) return false;
+      if (!Array.isArray(value.budgets)) return false;
+      if (!Array.isArray(value.purchases)) return false;
+      if (!Array.isArray(value.paymentMethods)) return false;
+      if (value.bills !== undefined && !Array.isArray(value.bills)) return false;
 
-      const budgetsValid = value.budgets.every(b => {
-        return typeof b.id === "string" &&
-          typeof b.name === "string" &&
-          Number.isFinite(Number(b.amount)) &&
-          typeof b.tag === "string" &&
-          ["recurring", "one-time"].includes(b.type) &&
-          typeof b.monthCreated === "string" &&
-          /^\d{4}-\d{2}$/.test(b.monthCreated);
+      const budgetsValid = value.budgets.every(budget => {
+        return typeof budget.id === "string" &&
+          typeof budget.name === "string" &&
+          Number.isFinite(Number(budget.amount)) &&
+          typeof budget.tag === "string" &&
+          ["recurring", "one-time"].includes(budget.type) &&
+          typeof budget.monthCreated === "string" &&
+          /^\d{4}-\d{2}$/.test(budget.monthCreated);
       });
 
-      const purchasesValid = value.purchases.every(p => {
-        return typeof p.id === "string" &&
-          typeof p.name === "string" &&
-          Number.isFinite(Number(p.amount)) &&
-          typeof p.tag === "string" &&
-          typeof p.paymentMethodId === "string" &&
-          typeof p.date === "string" &&
-          /^\d{4}-\d{2}-\d{2}$/.test(p.date);
+      const purchasesValid = value.purchases.every(purchase => {
+        return typeof purchase.id === "string" &&
+          typeof purchase.name === "string" &&
+          Number.isFinite(Number(purchase.amount)) &&
+          typeof purchase.tag === "string" &&
+          typeof purchase.paymentMethodId === "string" &&
+          typeof purchase.date === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(purchase.date);
       });
 
-      const paymentMethodsValid = value.paymentMethods.every(m => {
-        return typeof m.id === "string" &&
-          typeof m.name === "string" &&
-          typeof m.type === "string";
+      const paymentMethodsValid = value.paymentMethods.every(method => {
+        return typeof method.id === "string" &&
+          typeof method.name === "string" &&
+          typeof method.type === "string";
       });
 
-      return budgetsValid && purchasesValid && paymentMethodsValid;
+      const billsValid = (value.bills || []).every(bill => {
+        return typeof bill.id === "string" &&
+          typeof bill.title === "string" &&
+          Number.isFinite(Number(bill.amount)) &&
+          (bill.paymentMethodId === undefined || typeof bill.paymentMethodId === "string") &&
+          typeof bill.date === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(bill.date) &&
+          ["recurring", "one-time"].includes(bill.type) &&
+          (bill.day === undefined || (Number.isFinite(Number(bill.day)) && Number(bill.day) >= 1 && Number(bill.day) <= 31));
+      });
+
+      return budgetsValid && purchasesValid && paymentMethodsValid && billsValid;
     }
 
     function normalizeImportedData(data) {
       return {
-        budgets: data.budgets.map(b => ({
-          id: String(b.id),
-          name: String(b.name).trim(),
-          amount: roundMoney(Number(b.amount)),
-          tag: String(b.tag).trim(),
-          type: b.type,
-          monthCreated: b.monthCreated
+        budgets: data.budgets.map(budget => ({
+          id: String(budget.id),
+          name: String(budget.name).trim(),
+          amount: roundMoney(Number(budget.amount)),
+          tag: String(budget.tag).trim(),
+          type: budget.type,
+          monthCreated: budget.monthCreated
         })),
-        purchases: data.purchases.map(p => ({
-          id: String(p.id),
-          name: String(p.name).trim(),
-          amount: roundMoney(Number(p.amount)),
-          tag: String(p.tag).trim(),
-          paymentMethodId: String(p.paymentMethodId),
-          date: p.date
+        purchases: data.purchases.map(purchase => ({
+          id: String(purchase.id),
+          name: String(purchase.name).trim(),
+          amount: roundMoney(Number(purchase.amount)),
+          tag: String(purchase.tag).trim(),
+          paymentMethodId: String(purchase.paymentMethodId),
+          date: purchase.date
         })),
-        paymentMethods: data.paymentMethods.map(m => ({
-          id: String(m.id),
-          name: String(m.name).trim(),
-          type: String(m.type || "")
+        paymentMethods: data.paymentMethods.map(method => ({
+          id: String(method.id),
+          name: String(method.name).trim(),
+          type: String(method.type || "")
+        })),
+        bills: (data.bills || []).map(bill => ({
+          id: String(bill.id),
+          title: String(bill.title).trim(),
+          amount: roundMoney(Number(bill.amount)),
+          paymentMethodId: String(bill.paymentMethodId || ""),
+          date: bill.date,
+          day: bill.day ? Number(bill.day) : Number(bill.date.slice(8, 10)),
+          type: bill.type
         }))
       };
     }
@@ -1652,6 +3229,13 @@
 
     function setDefaultPurchaseDate() {
       els.purchaseDate.value = toDateInputValue(new Date());
+    }
+
+    function setDefaultBillInputs() {
+      const today = new Date();
+      els.billDay.value = String(today.getDate());
+      els.billDate.value = toDateInputValue(today);
+      syncBillTypeFields();
     }
 
     function getCurrentMonth() {
@@ -1698,6 +3282,11 @@
       return !Number.isNaN(date.getTime()) && toDateInputValue(date) === value;
     }
 
+    function getDaysInMonth(yearMonth) {
+      const [year, month] = yearMonth.split("-").map(Number);
+      return new Date(year, month, 0).getDate();
+    }
+
     function createId() {
       return crypto && crypto.randomUUID
         ? crypto.randomUUID()
@@ -1713,13 +3302,30 @@
         .replaceAll("'", "&#039;");
     }
 
+    function jsString(value) {
+      return String(value)
+        .replaceAll("\\", "\\\\")
+        .replaceAll("'", "\\'")
+        .replaceAll('"', "&quot;");
+    }
+
     window.openBudgetDetails = openBudgetDetails;
+    window.closeBudgetModal = closeBudgetModal;
+    window.openCalendarDayDetails = openCalendarDayDetails;
+    window.closeCalendarDayModal = closeCalendarDayModal;
     window.editBudget = editBudget;
     window.deleteBudget = deleteBudget;
+    window.editBill = editBill;
+    window.deleteBill = deleteBill;
     window.editPurchase = editPurchase;
     window.deletePurchase = deletePurchase;
     window.editPaymentMethod = editPaymentMethod;
     window.deletePaymentMethod = deletePaymentMethod;
+    window.wireDeleteButtons = wireDeleteButtons;
+    window.openDeleteConfirm = openDeleteConfirm;
+    window.closeDeleteConfirm = closeDeleteConfirm;
+    window.confirmPendingDelete = confirmPendingDelete;
+    window.performDelete = performDelete;
   </script>
 </body>
 </html>

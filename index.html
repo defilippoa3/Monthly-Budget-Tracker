@@ -583,9 +583,7 @@
       color: var(--text);
       font: inherit;
       cursor: default;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      display: block;
       box-shadow: none;
       transform: none;
     }
@@ -620,11 +618,10 @@
     }
 
     .calendar-day-head {
-      display: flex;
-      justify-content: space-between;
+      display: inline-flex;
+      flex-direction: column;
       align-items: flex-start;
-      gap: 6px;
-      margin-bottom: 7px;
+      gap: 8px;
     }
 
     .calendar-day-number {
@@ -647,16 +644,11 @@
     }
 
     .calendar-day-summary {
-      font-size: 0.76rem;
-      font-weight: 900;
-      color: #1e3a8a;
-      display: grid;
-      gap: 3px;
+      display: none;
     }
 
     .calendar-day-summary .calendar-day-total {
-      color: #1e3a8a;
-      white-space: nowrap;
+      display: none;
     }
 
     .calendar-purchase-list {
@@ -1033,9 +1025,19 @@
       }
 
       .calendar-day {
-        min-height: 104px;
+        height: 104px;
         border-radius: 10px;
         padding: 6px;
+      }
+
+      .calendar-day-head {
+        gap: 7px;
+      }
+
+      .calendar-day-count {
+        min-width: 24px;
+        height: 24px;
+        font-size: 0.76rem;
       }
 
       .calendar-day-total {
@@ -2089,12 +2091,6 @@
             <div class="calendar-day-number">${date.getDate()}</div>
             ${dayPurchases.length ? `<div class="calendar-day-count" aria-label="${dayPurchases.length} purchase(s)">${dayPurchases.length}</div>` : ""}
           </div>
-          ${dayPurchases.length ? `
-            <div class="calendar-day-summary">
-              <div>${dayPurchases.length} purchase${dayPurchases.length === 1 ? "" : "s"}</div>
-              <div class="calendar-day-total">${formatCurrency(dayTotal)}</div>
-            </div>
-          ` : `<div></div>`}
         `;
 
         if (!dayPurchases.length) {

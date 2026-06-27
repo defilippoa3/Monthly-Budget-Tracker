@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Monthly Budget Tracker</title>
+  <title>Financial Tracker</title>
   <meta name="theme-color" content="#2563eb" />
 
   <style>
@@ -1184,8 +1184,8 @@
 <body>
   <header>
     <div class="header-inner">
-      <h1>Monthly Budget Tracker</h1>
-      <p class="subtitle">Create budgets, track purchases, and monitor spending by month.</p>
+      <h1>Financial Tracker</h1>
+      <p class="subtitle">Track budgets, purchases, gift cards, income, and yearly spending.</p>
     </div>
   </header>
 
@@ -1217,8 +1217,10 @@
         <button type="button" class="nav-main" id="totalsToggle">Account Totals</button>
 
         <div class="nav-subgrid" id="totalsMenu">
+          <button type="button" class="tab" data-tab="giftCards">Gift Cards</button>
+          <button type="button" class="tab" data-tab="income">Income</button>
           <button type="button" class="tab" data-tab="mopTotals">MOP Totals</button>
-          <button type="button" class="tab" data-tab="yearTotal">Year Total</button>
+          <button type="button" class="tab" data-tab="yearTotal">Yearly Spend</button>
         </div>
 
         <div class="nav-break"></div>
@@ -1462,6 +1464,76 @@
       </div>
     </section>
 
+    <section id="giftCards" class="tab-panel">
+      <div class="grid two">
+        <div class="card">
+          <h2 id="giftCardFormTitle">Add Gift Card</h2>
+          <form id="giftCardForm">
+            <input type="hidden" id="giftCardId" />
+
+            <label for="giftCardCompany">Company</label>
+            <input id="giftCardCompany" placeholder="Target, Starbucks, Amazon" />
+
+            <label for="giftCardDigits">Last digits of card</label>
+            <input id="giftCardDigits" inputmode="numeric" maxlength="6" placeholder="Up to 6 digits" />
+            <p class="form-note">Optional. Use this to tell apart multiple gift cards from the same company.</p>
+
+            <label for="giftCardBalance">Current balance</label>
+            <input id="giftCardBalance" type="number" step="0.01" min="0" placeholder="25.00" />
+
+            <div class="form-actions" style="margin-top: 14px;">
+              <button type="submit" class="primary">Save gift card</button>
+              <button type="button" id="cancelGiftCardEditBtn" class="ghost hidden">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Gift Cards</h2>
+          <p class="muted small">Track gift cards independently. Use the purchase amount box on a card to subtract from its balance.</p>
+          <div id="giftCardList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="income" class="tab-panel">
+      <div class="grid two">
+        <div class="card">
+          <h2 id="incomeFormTitle">Add Income</h2>
+          <form id="incomeForm">
+            <input type="hidden" id="incomeId" />
+
+            <label for="incomeTitle">Income title</label>
+            <input id="incomeTitle" placeholder="Paycheck, bonus, side work" />
+
+            <label for="incomeAmount">Income amount</label>
+            <input id="incomeAmount" type="number" step="0.01" min="0" placeholder="1000.00" />
+
+            <label for="incomeDate">Date / first pay date</label>
+            <input id="incomeDate" type="date" />
+
+            <label for="incomeType">Income type</label>
+            <select id="incomeType">
+              <option value="one-time">One-time</option>
+              <option value="recurring">Recurring monthly</option>
+            </select>
+            <p class="form-note">Income is independent and does not affect budgets, purchases, bills, MOP totals, or yearly spend.</p>
+
+            <div class="form-actions" style="margin-top: 14px;">
+              <button type="submit" class="primary">Save income</button>
+              <button type="button" id="cancelIncomeEditBtn" class="ghost hidden">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Income for <span id="incomeYearLabel"></span></h2>
+          <div id="incomeSummaryCards" class="list" style="margin-bottom: 16px;"></div>
+          <div id="incomeList" class="list"></div>
+        </div>
+      </div>
+    </section>
+
     <section id="mopTotals" class="tab-panel">
       <div class="card">
         <h2>MOP Totals for <span id="mopTotalsMonthLabel"></span></h2>
@@ -1472,8 +1544,8 @@
 
     <section id="yearTotal" class="tab-panel">
       <div class="card">
-        <h2>Year Total for <span id="yearTotalYearLabel"></span></h2>
-        <p class="muted">Year Total shows actual spending through today. Projected Year Total includes future recurring bills/expenses.</p>
+        <h2>Yearly Spend for <span id="yearTotalYearLabel"></span></h2>
+        <p class="muted">Yearly Spend shows actual spending through today. Projected Year Total includes future recurring bills/expenses.</p>
 
         <div id="yearSummaryCards" class="list" style="margin-bottom: 16px;"></div>
 
@@ -1493,7 +1565,7 @@
       <div class="grid two">
         <div class="card">
           <h2>Export Data</h2>
-          <p class="muted">Download all budgets, purchases, MOPs, and bills as a JSON backup file.</p>
+          <p class="muted">Download all budgets, purchases, MOPs, bills, gift cards, and income entries as a JSON backup file.</p>
           <button type="button" id="exportBtn" class="primary">Export JSON</button>
         </div>
 
@@ -1509,7 +1581,7 @@
 
       <div class="card danger-zone">
         <h2>Reset All Data</h2>
-        <p class="muted">This permanently deletes all local budgets, purchases, MOPs, and bills stored in this browser.</p>
+        <p class="muted">This permanently deletes all local budgets, purchases, MOPs, bills, gift cards, and income entries stored in this browser.</p>
         <button type="button" id="resetBtn" class="danger">Reset all data</button>
       </div>
     </section>
@@ -1596,7 +1668,9 @@
         budgets: [],
         purchases: [],
         paymentMethods: [],
-        bills: []
+        bills: [],
+        giftCards: [],
+        incomeEntries: []
       },
       selectedMonth: getCurrentMonth(),
       activeTab: "dashboard",
@@ -1684,6 +1758,27 @@
       paymentMethodList: document.getElementById("paymentMethodList"),
       cancelPaymentEditBtn: document.getElementById("cancelPaymentEditBtn"),
 
+      giftCardForm: document.getElementById("giftCardForm"),
+      giftCardFormTitle: document.getElementById("giftCardFormTitle"),
+      giftCardId: document.getElementById("giftCardId"),
+      giftCardCompany: document.getElementById("giftCardCompany"),
+      giftCardDigits: document.getElementById("giftCardDigits"),
+      giftCardBalance: document.getElementById("giftCardBalance"),
+      giftCardList: document.getElementById("giftCardList"),
+      cancelGiftCardEditBtn: document.getElementById("cancelGiftCardEditBtn"),
+
+      incomeForm: document.getElementById("incomeForm"),
+      incomeFormTitle: document.getElementById("incomeFormTitle"),
+      incomeId: document.getElementById("incomeId"),
+      incomeTitle: document.getElementById("incomeTitle"),
+      incomeAmount: document.getElementById("incomeAmount"),
+      incomeDate: document.getElementById("incomeDate"),
+      incomeType: document.getElementById("incomeType"),
+      incomeYearLabel: document.getElementById("incomeYearLabel"),
+      incomeSummaryCards: document.getElementById("incomeSummaryCards"),
+      incomeList: document.getElementById("incomeList"),
+      cancelIncomeEditBtn: document.getElementById("cancelIncomeEditBtn"),
+
       mopTotalsMonthLabel: document.getElementById("mopTotalsMonthLabel"),
       mopTotalsList: document.getElementById("mopTotalsList"),
 
@@ -1726,6 +1821,7 @@
       setupEventListeners();
       setDefaultPurchaseDate();
       setDefaultBillInputs();
+      setDefaultIncomeDate();
       syncPurchaseSplitFields();
       saveData();
       renderAll();
@@ -1781,6 +1877,15 @@
 
       els.paymentForm.addEventListener("submit", handlePaymentSubmit);
       els.cancelPaymentEditBtn.addEventListener("click", resetPaymentForm);
+
+      els.giftCardForm.addEventListener("submit", handleGiftCardSubmit);
+      els.cancelGiftCardEditBtn.addEventListener("click", resetGiftCardForm);
+      els.giftCardDigits.addEventListener("input", () => {
+        els.giftCardDigits.value = els.giftCardDigits.value.replace(/\D/g, "").slice(0, 6);
+      });
+
+      els.incomeForm.addEventListener("submit", handleIncomeSubmit);
+      els.cancelIncomeEditBtn.addEventListener("click", resetIncomeForm);
 
       els.closeBudgetModalBtn.addEventListener("click", closeBudgetModal);
 
@@ -1872,6 +1977,16 @@
 
       if (kind === "payment") {
         deletePaymentMethod(id);
+        return;
+      }
+
+      if (kind === "giftCard") {
+        deleteGiftCard(id);
+        return;
+      }
+
+      if (kind === "income") {
+        deleteIncome(id);
         return;
       }
 
@@ -1975,6 +2090,8 @@
       renderPurchases();
       renderPurchaseCalendar();
       renderPaymentMethods();
+      renderGiftCards();
+      renderIncome();
       renderMopTotals();
       renderYearTotal();
       renderMonthTotals();
@@ -2372,6 +2489,317 @@
           </div>
         `;
       }).join("");
+    }
+
+
+
+    function renderGiftCards() {
+      const cards = state.data.giftCards || [];
+
+      if (!cards.length) {
+        els.giftCardList.innerHTML = `<div class="empty">No gift cards yet.</div>`;
+        return;
+      }
+
+      const totalBalance = cards.reduce((sum, card) => sum + Number(card.balance), 0);
+
+      els.giftCardList.innerHTML = `
+        <div class="mop-total-card" style="background:#eef2ff;border-color:#dbeafe;">
+          <div>
+            <div class="mop-total-name">Gift Card Total</div>
+            <div class="item-meta">${cards.length} active gift card(s)</div>
+          </div>
+          <div class="mop-total-amount">${formatCurrency(totalBalance)}</div>
+        </div>
+      ` + cards
+        .slice()
+        .sort((a, b) => a.company.localeCompare(b.company) || String(a.digits).localeCompare(String(b.digits)))
+        .map(card => `
+          <div class="list-item" data-kind="giftCard" data-id="${escapeHtml(card.id)}">
+            <div>
+              <div class="item-title">${escapeHtml(card.company)}</div>
+              <div class="item-meta">
+                ${card.digits ? `Last digits: ${escapeHtml(card.digits)}<br>` : ""}
+                Balance: ${formatCurrency(card.balance)}
+              </div>
+              <div class="form-actions" style="margin-top: 10px;">
+                <input id="giftCardUse_${escapeHtml(card.id)}" type="number" min="0" step="0.01" placeholder="Purchase amount" style="max-width: 180px;" />
+                <button type="button" class="ghost" onclick="applyGiftCardUse('${jsString(card.id)}')">Subtract</button>
+              </div>
+            </div>
+            <div class="row-actions">
+              <button type="button" class="ghost" onclick="editGiftCard('${jsString(card.id)}')">Edit</button>
+              <button type="button" class="danger js-delete-btn" data-delete-kind="giftCard" data-delete-id="${escapeHtml(card.id)}">Delete</button>
+            </div>
+          </div>
+        `).join("");
+    }
+
+    function handleGiftCardSubmit(event) {
+      event.preventDefault();
+
+      const id = els.giftCardId.value;
+      const company = els.giftCardCompany.value.trim();
+      const digits = els.giftCardDigits.value.replace(/\D/g, "").slice(0, 6);
+      const balance = Number(els.giftCardBalance.value);
+
+      if (!company) return showNotice("Gift card company is required.", "error");
+      if (!Number.isFinite(balance) || balance < 0) return showNotice("Gift card balance must be 0 or greater.", "error");
+
+      if (id) {
+        const card = state.data.giftCards.find(item => item.id === id);
+        if (!card) return showNotice("Gift card not found.", "error");
+        card.company = company;
+        card.digits = digits;
+        card.balance = roundMoney(balance);
+      } else {
+        state.data.giftCards.push({
+          id: createId(),
+          company,
+          digits,
+          balance: roundMoney(balance)
+        });
+      }
+
+      saveData();
+      resetGiftCardForm();
+      renderAll();
+      showNotice(id ? "Gift card updated." : "Gift card added.", "success");
+    }
+
+    function editGiftCard(id) {
+      const card = state.data.giftCards.find(item => item.id === id);
+      if (!card) return showNotice("Gift card not found.", "error");
+
+      state.activeTab = "giftCards";
+      els.giftCardFormTitle.textContent = "Edit Gift Card";
+      els.giftCardId.value = card.id;
+      els.giftCardCompany.value = card.company;
+      els.giftCardDigits.value = card.digits || "";
+      els.giftCardBalance.value = card.balance;
+      els.cancelGiftCardEditBtn.classList.remove("hidden");
+
+      renderTabs();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteGiftCard(id) {
+      const card = state.data.giftCards.find(item => item.id === id);
+      if (!card) return showNotice("Gift card not found.", "error");
+
+      state.data.giftCards = state.data.giftCards.filter(item => item.id !== id);
+      saveData();
+      resetGiftCardForm();
+      renderAll();
+      showNotice("Gift card deleted.", "success");
+    }
+
+    function applyGiftCardUse(id) {
+      const card = state.data.giftCards.find(item => item.id === id);
+      if (!card) return showNotice("Gift card not found.", "error");
+
+      const input = document.getElementById(`giftCardUse_${id}`);
+      const amount = Number(input ? input.value : 0);
+
+      if (!Number.isFinite(amount) || amount <= 0) return showNotice("Enter a purchase amount greater than 0.", "error");
+      if (amount > Number(card.balance)) return showNotice("Purchase amount cannot be greater than the gift card balance.", "error");
+
+      card.balance = roundMoney(Number(card.balance) - amount);
+      saveData();
+      renderAll();
+      showNotice(`${card.company} gift card balance updated.`, "success");
+    }
+
+    function resetGiftCardForm() {
+      els.giftCardForm.reset();
+      els.giftCardId.value = "";
+      els.giftCardFormTitle.textContent = "Add Gift Card";
+      els.cancelGiftCardEditBtn.classList.add("hidden");
+    }
+
+    function renderIncome() {
+      const selectedYear = state.selectedMonth.slice(0, 4);
+      els.incomeYearLabel.textContent = selectedYear;
+
+      const actualTotal = getIncomeTotalForYear(selectedYear, false);
+      const projectedTotal = getIncomeTotalForYear(selectedYear, true);
+      const entries = (state.data.incomeEntries || [])
+        .filter(entry => incomeEntryTouchesYear(entry, selectedYear))
+        .slice()
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      els.incomeSummaryCards.innerHTML = `
+        <div class="year-total-card" style="background:#eef2ff;border-color:#dbeafe;">
+          <div>
+            <div class="year-total-name">Year Total</div>
+            <div class="item-meta">Actual income through ${getIncomeCutoffLabel(selectedYear)}</div>
+          </div>
+          <div class="year-total-amount">${formatCurrency(actualTotal)}</div>
+        </div>
+        <div class="year-total-card" style="background:#eef2ff;border-color:#dbeafe;">
+          <div>
+            <div class="year-total-name">Projected Year Total</div>
+            <div class="item-meta">Full ${selectedYear} projection including recurring income</div>
+          </div>
+          <div class="year-total-amount">${formatCurrency(projectedTotal)}</div>
+        </div>
+      `;
+
+      if (!entries.length) {
+        els.incomeList.innerHTML = `<div class="empty">No income entries yet for ${selectedYear}.</div>`;
+        return;
+      }
+
+      els.incomeList.innerHTML = entries.map(entry => `
+        <div class="list-item" data-kind="income" data-id="${escapeHtml(entry.id)}">
+          <div>
+            <div class="item-title">${escapeHtml(entry.title)}</div>
+            <div class="item-meta">
+              Amount: ${formatCurrency(entry.amount)}<br>
+              Date: ${entry.date}<br>
+              Type: ${entry.type === "recurring" ? "Recurring monthly" : "One-time"}
+            </div>
+          </div>
+          <div class="row-actions">
+            <button type="button" class="ghost" onclick="editIncome('${jsString(entry.id)}')">Edit</button>
+            <button type="button" class="danger js-delete-btn" data-delete-kind="income" data-delete-id="${escapeHtml(entry.id)}">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function handleIncomeSubmit(event) {
+      event.preventDefault();
+
+      const id = els.incomeId.value;
+      const title = els.incomeTitle.value.trim();
+      const amount = Number(els.incomeAmount.value);
+      const date = els.incomeDate.value;
+      const type = els.incomeType.value;
+
+      if (!title) return showNotice("Income title is required.", "error");
+      if (!Number.isFinite(amount) || amount <= 0) return showNotice("Income amount must be greater than 0.", "error");
+      if (!isValidDate(date)) return showNotice("Income date is invalid.", "error");
+      if (!["recurring", "one-time"].includes(type)) return showNotice("Income type is invalid.", "error");
+
+      if (id) {
+        const entry = state.data.incomeEntries.find(item => item.id === id);
+        if (!entry) return showNotice("Income entry not found.", "error");
+        entry.title = title;
+        entry.amount = roundMoney(amount);
+        entry.date = date;
+        entry.type = type;
+      } else {
+        state.data.incomeEntries.push({
+          id: createId(),
+          title,
+          amount: roundMoney(amount),
+          date,
+          type
+        });
+      }
+
+      saveData();
+      resetIncomeForm();
+      renderAll();
+      showNotice(id ? "Income updated." : "Income added.", "success");
+    }
+
+    function editIncome(id) {
+      const entry = state.data.incomeEntries.find(item => item.id === id);
+      if (!entry) return showNotice("Income entry not found.", "error");
+
+      state.activeTab = "income";
+      els.incomeFormTitle.textContent = "Edit Income";
+      els.incomeId.value = entry.id;
+      els.incomeTitle.value = entry.title;
+      els.incomeAmount.value = entry.amount;
+      els.incomeDate.value = entry.date;
+      els.incomeType.value = entry.type;
+      els.cancelIncomeEditBtn.classList.remove("hidden");
+
+      renderTabs();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteIncome(id) {
+      const entry = state.data.incomeEntries.find(item => item.id === id);
+      if (!entry) return showNotice("Income entry not found.", "error");
+
+      state.data.incomeEntries = state.data.incomeEntries.filter(item => item.id !== id);
+      saveData();
+      resetIncomeForm();
+      renderAll();
+      showNotice("Income deleted.", "success");
+    }
+
+    function resetIncomeForm() {
+      els.incomeForm.reset();
+      els.incomeId.value = "";
+      els.incomeFormTitle.textContent = "Add Income";
+      els.cancelIncomeEditBtn.classList.add("hidden");
+      setDefaultIncomeDate();
+      els.incomeType.value = "one-time";
+    }
+
+    function setDefaultIncomeDate() {
+      if (els.incomeDate) els.incomeDate.value = toDateInputValue(new Date());
+    }
+
+    function incomeEntryTouchesYear(entry, year) {
+      if (entry.type === "one-time") return entry.date.slice(0, 4) === year;
+      return entry.date.slice(0, 4) <= year;
+    }
+
+    function getIncomeTotalForYear(year, projected) {
+      const entries = state.data.incomeEntries || [];
+      const today = new Date();
+      const currentYear = String(today.getFullYear());
+      const cutoffDate = projected
+        ? `${year}-12-31`
+        : year < currentYear
+          ? `${year}-12-31`
+          : year > currentYear
+            ? `${year}-00-00`
+            : toDateInputValue(today);
+
+      return entries.reduce((sum, entry) => {
+        if (entry.type === "one-time") {
+          return entry.date.slice(0, 4) === year && entry.date <= cutoffDate
+            ? sum + Number(entry.amount)
+            : sum;
+        }
+
+        for (let monthIndex = 1; monthIndex <= 12; monthIndex += 1) {
+          const yearMonth = `${year}-${String(monthIndex).padStart(2, "0")}`;
+          if (yearMonth < entry.date.slice(0, 7)) continue;
+          const occurrenceDate = getRecurringDateForMonth(entry.date, yearMonth);
+          if (occurrenceDate <= cutoffDate) sum += Number(entry.amount);
+        }
+
+        return sum;
+      }, 0);
+    }
+
+    function getIncomeCutoffLabel(year) {
+      const today = new Date();
+      const currentYear = String(today.getFullYear());
+      const cutoff = year < currentYear
+        ? `${year}-12-31`
+        : year > currentYear
+          ? `${year}-01-01`
+          : toDateInputValue(today);
+      return new Date(cutoff + "T00:00:00").toLocaleDateString(undefined, {
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function getRecurringDateForMonth(startDate, yearMonth) {
+      const day = Number(startDate.slice(8, 10));
+      const normalizedDay = String(Math.min(day, getDaysInMonth(yearMonth))).padStart(2, "0");
+      return `${yearMonth}-${normalizedDay}`;
     }
 
     function renderMopTotals() {
@@ -3313,6 +3741,8 @@
 
       saveData();
       resetPaymentForm();
+      resetGiftCardForm();
+      resetIncomeForm();
       renderAll();
       showNotice(id ? "MOP updated." : "MOP added.", "success");
     }
@@ -3361,7 +3791,7 @@
 
     function exportData() {
       const exportPayload = {
-        app: "Monthly Budget Tracker",
+        app: "Financial Tracker",
         version: 14,
         exportedAt: new Date().toISOString(),
         data: state.data
@@ -3374,7 +3804,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `monthly-budget-tracker-${getCurrentMonth()}.json`;
+      link.download = `financial-tracker-${getCurrentMonth()}.json`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -3399,7 +3829,7 @@
           const importedData = parsed.data && isValidDataShape(parsed.data) ? parsed.data : parsed;
 
           if (!isValidDataShape(importedData)) {
-            showNotice("Invalid import file. Expected budgets, purchases, paymentMethods, and optional bills arrays.", "error");
+            showNotice("Invalid import file. Expected budgets, purchases, paymentMethods, bills, giftCards, and incomeEntries arrays.", "error");
             return;
           }
 
@@ -3412,6 +3842,8 @@
           resetBillForm();
           resetPurchaseForm();
           resetPaymentForm();
+          resetGiftCardForm();
+          resetIncomeForm();
           els.importFile.value = "";
           renderAll();
           showNotice("Data imported successfully.", "success");
@@ -3424,13 +3856,15 @@
     }
 
     function resetAllData() {
-      if (!confirm("Reset all data? This permanently deletes all budgets, purchases, MOPs, and bills stored in this browser.")) return;
+      if (!confirm("Reset all data? This permanently deletes all budgets, purchases, MOPs, bills, gift cards, and income entries stored in this browser.")) return;
 
       state.data = {
         budgets: [],
         purchases: [],
         paymentMethods: [],
-        bills: []
+        bills: [],
+        giftCards: [],
+        incomeEntries: []
       };
 
       ensureVenmoExists();
@@ -3439,6 +3873,8 @@
       resetBillForm();
       resetPurchaseForm();
       resetPaymentForm();
+      resetGiftCardForm();
+      resetIncomeForm();
       renderAll();
       showNotice("All data has been reset.", "success");
     }
@@ -3647,6 +4083,8 @@
       if (!Array.isArray(value.purchases)) return false;
       if (!Array.isArray(value.paymentMethods)) return false;
       if (value.bills !== undefined && !Array.isArray(value.bills)) return false;
+      if (value.giftCards !== undefined && !Array.isArray(value.giftCards)) return false;
+      if (value.incomeEntries !== undefined && !Array.isArray(value.incomeEntries)) return false;
 
       const budgetsValid = value.budgets.every(budget => {
         return typeof budget.id === "string" &&
@@ -3693,7 +4131,23 @@
           (bill.day === undefined || (Number.isFinite(Number(bill.day)) && Number(bill.day) >= 1 && Number(bill.day) <= 31));
       });
 
-      return budgetsValid && purchasesValid && paymentMethodsValid && billsValid;
+      const giftCardsValid = (value.giftCards || []).every(card => {
+        return typeof card.id === "string" &&
+          typeof card.company === "string" &&
+          (card.digits === undefined || /^\d{0,6}$/.test(String(card.digits))) &&
+          Number.isFinite(Number(card.balance));
+      });
+
+      const incomeValid = (value.incomeEntries || []).every(entry => {
+        return typeof entry.id === "string" &&
+          typeof entry.title === "string" &&
+          Number.isFinite(Number(entry.amount)) &&
+          typeof entry.date === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(entry.date) &&
+          ["recurring", "one-time"].includes(entry.type);
+      });
+
+      return budgetsValid && purchasesValid && paymentMethodsValid && billsValid && giftCardsValid && incomeValid;
     }
 
     function normalizeImportedData(data) {
@@ -3739,6 +4193,19 @@
           date: bill.date,
           day: bill.day ? Number(bill.day) : Number(bill.date.slice(8, 10)),
           type: bill.type
+        })),
+        giftCards: (data.giftCards || []).map(card => ({
+          id: String(card.id),
+          company: String(card.company || card.name || "").trim(),
+          digits: String(card.digits || "").replace(/\D/g, "").slice(0, 6),
+          balance: roundMoney(Number(card.balance))
+        })),
+        incomeEntries: (data.incomeEntries || []).map(entry => ({
+          id: String(entry.id),
+          title: String(entry.title).trim(),
+          amount: roundMoney(Number(entry.amount)),
+          date: entry.date,
+          type: entry.type
         }))
       };
     }
@@ -3893,6 +4360,11 @@
     window.deletePurchase = deletePurchase;
     window.editPaymentMethod = editPaymentMethod;
     window.deletePaymentMethod = deletePaymentMethod;
+    window.editGiftCard = editGiftCard;
+    window.deleteGiftCard = deleteGiftCard;
+    window.applyGiftCardUse = applyGiftCardUse;
+    window.editIncome = editIncome;
+    window.deleteIncome = deleteIncome;
     window.wireDeleteButtons = wireDeleteButtons;
     window.openDeleteConfirm = openDeleteConfirm;
     window.closeDeleteConfirm = closeDeleteConfirm;

@@ -22,6 +22,8 @@
       --soft-warning: #fef3c7;
       --soft-danger: #fee2e2;
       --month-color: #2563eb;
+      --month-bg: rgba(37, 99, 235, 0.20);
+      --month-bg-strong: rgba(37, 99, 235, 0.30);
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
       --radius: 18px;
     }
@@ -33,8 +35,10 @@
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
+      background: linear-gradient(180deg, var(--month-bg-strong) 0%, var(--month-bg) 36%, var(--bg) 68%, var(--month-bg) 100%);
+      background-attachment: fixed;
       color: var(--text);
+      min-height: 100vh;
     }
 
     header {
@@ -478,6 +482,19 @@
       text-align: left;
       text-align-last: left;
     }
+    #purchaseDate {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      display: block;
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      line-height: 1.25;
+      min-height: 46px;
+      text-align: left;
+    }
+
 
     .split-entry-option {
       margin-top: 12px;
@@ -1110,6 +1127,18 @@
         padding: 11px 12px;
       }
 
+      #purchaseDate {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        padding: 10px 12px;
+        min-height: 44px;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+
       .calendar-grid {
         gap: 5px;
       }
@@ -1732,7 +1761,10 @@
         });
       });
 
-      els.purchaseDate.addEventListener("change", renderDatalists);
+      els.purchaseDate.addEventListener("change", () => {
+        renderDatalists();
+        syncPurchaseSplitFields();
+      });
       els.purchaseSplitToggle.addEventListener("change", syncPurchaseSplitFields);
       els.purchaseAmount.addEventListener("input", updateSplitRemainingSuggestion);
       els.purchaseSplitAmountPrimary.addEventListener("input", updateSplitRemainingSuggestion);
@@ -1932,6 +1964,7 @@
       renderMonthColor();
       renderMonthLabel();
       renderTabs();
+      populatePurchaseDateOptions();
       renderDatalists();
       renderPaymentMethodOptions();
       populateBillStartMonthOptions();
@@ -1950,7 +1983,10 @@
 
     function renderMonthColor() {
       const month = state.selectedMonth.slice(5, 7);
-      document.documentElement.style.setProperty("--month-color", MONTH_COLORS[month] || "#2563eb");
+      const color = MONTH_COLORS[month] || "#2563eb";
+      document.documentElement.style.setProperty("--month-color", color);
+      document.documentElement.style.setProperty("--month-bg", hexToRgba(color, 0.20));
+      document.documentElement.style.setProperty("--month-bg-strong", hexToRgba(color, 0.30));
     }
 
     function renderTabs() {
@@ -2592,6 +2628,29 @@
             <div class="month-total-amount">${formatCurrency(month.total)}</div>
           </div>
         `).join("");
+    }
+
+    function populatePurchaseDateOptions(preferredDate) {
+      if (!els.purchaseDate) return;
+
+      const currentValue = preferredDate || els.purchaseDate.value || toDateInputValue(new Date());
+      const todayValue = toDateInputValue(new Date());
+      const daysInMonth = getDaysInMonth(state.selectedMonth);
+      const minDate = `${state.selectedMonth}-01`;
+      const maxDate = `${state.selectedMonth}-${String(daysInMonth).padStart(2, "0")}`;
+
+      let selectedDate = currentValue;
+      if (!isValidDate(selectedDate) || selectedDate.slice(0, 7) !== state.selectedMonth) {
+        const sourceDay = isValidDate(currentValue)
+          ? Number(currentValue.slice(8, 10))
+          : Number(todayValue.slice(8, 10));
+        const day = String(Math.min(sourceDay, daysInMonth)).padStart(2, "0");
+        selectedDate = `${state.selectedMonth}-${day}`;
+      }
+
+      els.purchaseDate.min = minDate;
+      els.purchaseDate.max = maxDate;
+      els.purchaseDate.value = selectedDate;
     }
 
     function renderDatalists() {
@@ -3722,7 +3781,11 @@
     }
 
     function setDefaultPurchaseDate() {
-      els.purchaseDate.value = toDateInputValue(new Date());
+      const todayValue = toDateInputValue(new Date());
+      const preferredDate = todayValue.slice(0, 7) === state.selectedMonth
+        ? todayValue
+        : `${state.selectedMonth}-${String(Math.min(Number(todayValue.slice(8, 10)), getDaysInMonth(state.selectedMonth))).padStart(2, "0")}`;
+      populatePurchaseDateOptions(preferredDate);
     }
 
     function setDefaultBillInputs() {
@@ -3781,6 +3844,18 @@
     function getDaysInMonth(yearMonth) {
       const [year, month] = yearMonth.split("-").map(Number);
       return new Date(year, month, 0).getDate();
+    }
+
+    function hexToRgba(hex, alpha) {
+      const normalized = String(hex || "#2563eb").replace("#", "");
+      const full = normalized.length === 3
+        ? normalized.split("").map(char => char + char).join("")
+        : normalized;
+      const number = parseInt(full, 16);
+      const red = (number >> 16) & 255;
+      const green = (number >> 8) & 255;
+      const blue = number & 255;
+      return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
     }
 
     function createId() {

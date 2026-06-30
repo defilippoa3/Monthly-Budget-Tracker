@@ -24,6 +24,10 @@
       --month-color: #2563eb;
       --month-bg: rgba(37, 99, 235, 0.20);
       --month-bg-strong: rgba(37, 99, 235, 0.30);
+      --month-button-bg: rgba(37, 99, 235, 0.12);
+      --month-button-border: rgba(37, 99, 235, 0.28);
+      --month-button-text: #1e3a8a;
+      --month-button-active-text: #ffffff;
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
       --radius: 18px;
     }
@@ -139,8 +143,8 @@
       padding: 10px 13px;
       cursor: pointer;
       font-weight: 700;
-      background: #eef2ff;
-      color: #1e3a8a;
+      background: var(--month-button-bg);
+      color: var(--month-button-text);
       transition: 0.15s ease;
       font-family: inherit;
       font-size: 0.94rem;
@@ -153,12 +157,13 @@
     }
 
     button.primary {
-      background: var(--primary);
-      color: white;
+      background: var(--month-color);
+      color: var(--month-button-active-text);
     }
 
     button.primary:hover {
-      background: var(--primary-dark);
+      background: var(--month-color);
+      filter: brightness(0.94);
     }
 
     button.danger {
@@ -182,39 +187,39 @@
     }
 
     button.nav-main {
-      background: #eef2ff;
-      color: #1e3a8a;
-      border-color: #dbeafe;
+      background: var(--month-button-bg);
+      color: var(--month-button-text);
+      border-color: var(--month-button-border);
       font-weight: 900;
     }
 
     button.nav-main.open {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
+      background: var(--month-color);
+      color: var(--month-button-active-text);
+      border-color: var(--month-color);
     }
 
     button.tab.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
+      background: var(--month-color);
+      color: var(--month-button-active-text);
+      border-color: var(--month-color);
     }
 
     button.tab.tab-purchases,
     button.tab.tab-calendar,
     button.tab.tab-dashboard {
-      background: #eef2ff;
-      color: #1e3a8a;
-      border-color: #dbeafe;
+      background: var(--month-button-bg);
+      color: var(--month-button-text);
+      border-color: var(--month-button-border);
       font-weight: 900;
     }
 
     button.tab.tab-purchases.active,
     button.tab.tab-calendar.active,
     button.tab.tab-dashboard.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
+      background: var(--month-color);
+      color: var(--month-button-active-text);
+      border-color: var(--month-color);
     }
 
     button:disabled {
@@ -961,9 +966,9 @@
     .month-total-toggle {
       width: 100%;
       margin: 14px 0 14px;
-      background: #eef2ff;
-      color: #1e3a8a;
-      border: 1px solid #dbeafe;
+      background: var(--month-button-bg);
+      color: var(--month-button-text);
+      border: 1px solid var(--month-button-border);
       font-weight: 900;
     }
 
@@ -2139,8 +2144,14 @@
       const month = state.selectedMonth.slice(5, 7);
       const color = MONTH_COLORS[month] || "#2563eb";
       document.documentElement.style.setProperty("--month-color", color);
+      document.documentElement.style.setProperty("--primary", color);
+      document.documentElement.style.setProperty("--primary-dark", darkenHex(color, 0.16));
       document.documentElement.style.setProperty("--month-bg", hexToRgba(color, 0.20));
       document.documentElement.style.setProperty("--month-bg-strong", hexToRgba(color, 0.30));
+      document.documentElement.style.setProperty("--month-button-bg", hexToRgba(color, 0.16));
+      document.documentElement.style.setProperty("--month-button-border", hexToRgba(color, 0.38));
+      document.documentElement.style.setProperty("--month-button-text", getMonthButtonTextColor(color));
+      document.documentElement.style.setProperty("--month-button-active-text", getMonthButtonActiveTextColor(color));
     }
 
     function renderTabs() {
@@ -4430,15 +4441,51 @@
       return new Date(year, month, 0).getDate();
     }
 
-    function hexToRgba(hex, alpha) {
+    function darkenHex(hex, amount = 0.16) {
+      const { red, green, blue } = hexToRgbParts(hex);
+      const darkened = [red, green, blue].map(value => {
+        return Math.max(0, Math.round(value * (1 - amount))).toString(16).padStart(2, "0");
+      });
+
+      return `#${darkened.join("")}`;
+    }
+
+    function getMonthButtonTextColor(hex) {
+      const { red, green, blue } = hexToRgbParts(hex);
+
+      if (red > 220 && green > 160 && blue < 80) return "#854d0e";
+      if (red > 190 && green > 120 && blue < 70) return "#7c2d12";
+      if (green > red && green > blue) return "#14532d";
+      if (red > green && red > blue) return "#7f1d1d";
+      if (blue > red && blue > green) return "#1e3a8a";
+
+      return "#374151";
+    }
+
+    function getMonthButtonActiveTextColor(hex) {
+      const { red, green, blue } = hexToRgbParts(hex);
+      const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+
+      if (red > 220 && green > 160 && blue < 80) return "#422006";
+      return luminance > 0.58 ? "#111827" : "#ffffff";
+    }
+
+    function hexToRgbParts(hex) {
       const normalized = String(hex || "#2563eb").replace("#", "");
       const full = normalized.length === 3
         ? normalized.split("").map(char => char + char).join("")
         : normalized;
       const number = parseInt(full, 16);
-      const red = (number >> 16) & 255;
-      const green = (number >> 8) & 255;
-      const blue = number & 255;
+
+      return {
+        red: (number >> 16) & 255,
+        green: (number >> 8) & 255,
+        blue: number & 255
+      };
+    }
+
+    function hexToRgba(hex, alpha) {
+      const { red, green, blue } = hexToRgbParts(hex);
       return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
     }
 

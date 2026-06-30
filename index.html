@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Financial Tracker</title>
+  <title>Budgeting and Financial Tracker</title>
   <meta name="theme-color" content="#2563eb" />
 
   <style>
@@ -473,7 +473,8 @@
     }
 
 
-    #billStartMonth {
+    #billStartMonth,
+    #billEndMonth {
       width: 100%;
       max-width: 100%;
       min-width: 0;
@@ -686,7 +687,17 @@
       cursor: pointer;
     }
 
-    .calendar-day.has-purchases:hover {
+    .calendar-day.has-bills {
+      border-color: #fdba74;
+      cursor: pointer;
+    }
+
+    .calendar-day.has-bills:not(.has-purchases) {
+      background: #fff7ed;
+    }
+
+    .calendar-day.has-purchases:hover,
+    .calendar-day.has-bills:hover {
       filter: brightness(0.99);
       transform: translateY(-1px);
       box-shadow: 0 8px 20px rgba(37, 99, 235, 0.14);
@@ -698,7 +709,8 @@
       opacity: 0.72;
     }
 
-    .calendar-day.outside-month.has-purchases {
+    .calendar-day.outside-month.has-purchases,
+    .calendar-day.outside-month.has-bills {
       background: #f8fafc;
       border-color: var(--border);
       cursor: default;
@@ -721,18 +733,33 @@
       font-size: 0.95rem;
     }
 
-    .calendar-day-count {
+    .calendar-day-badges {
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .calendar-day-count,
+    .calendar-day-bill-count {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       min-width: 28px;
       height: 28px;
       border-radius: 999px;
-      background: var(--primary);
       color: white;
       font-weight: 950;
       font-size: 0.82rem;
       line-height: 1;
+    }
+
+    .calendar-day-count {
+      background: var(--primary);
+    }
+
+    .calendar-day-bill-count {
+      background: #f97316;
     }
 
     .calendar-day-summary {
@@ -1118,7 +1145,8 @@
         padding: 11px 12px;
       }
 
-      #billStartMonth {
+      #billStartMonth,
+      #billEndMonth {
         width: 100%;
         max-width: 100%;
         min-width: 0;
@@ -1158,10 +1186,15 @@
         gap: 7px;
       }
 
-      .calendar-day-count {
+      .calendar-day-count,
+      .calendar-day-bill-count {
         min-width: 24px;
         height: 24px;
         font-size: 0.76rem;
+      }
+
+      .calendar-day-badges {
+        gap: 4px;
       }
 
       .calendar-day-total {
@@ -1184,7 +1217,7 @@
 <body>
   <header>
     <div class="header-inner">
-      <h1>Financial Tracker</h1>
+      <h1>Budgeting and Financial Tracker</h1>
       <p class="subtitle">Track budgets, purchases, gift cards, income, and yearly spending.</p>
     </div>
   </header>
@@ -1373,7 +1406,10 @@
               <label for="billStartMonth">Starting month</label>
               <select id="billStartMonth"></select>
 
-              <p class="form-note">For recurring bills, choose the day of the month and the first month it should count. It will be included from that month onward, not before.</p>
+              <label for="billEndMonth">Ending month</label>
+              <select id="billEndMonth"></select>
+
+              <p class="form-note">For recurring bills, choose the day of the month, first month, and last month it should count. It will only be included inside that month range.</p>
             </div>
 
             <div id="billOneTimeDateWrap" class="hidden">
@@ -1458,8 +1494,8 @@
 
     <section id="calendar" class="tab-panel">
       <div class="card">
-        <h2>Purchase Calendar for <span id="purchaseCalendarMonthLabel"></span></h2>
-        <p class="muted">A full calendar view of the selected month. Days with purchases are highlighted light blue and show the number of purchases. Click a highlighted day to view each purchase by cost.</p>
+        <h2>Purchase and Bill Calendar for <span id="purchaseCalendarMonthLabel"></span></h2>
+        <p class="muted">A full calendar view of the selected month. Blue bubbles show purchase counts. Orange bubbles show paid bill counts. Click a highlighted day to view the details.</p>
         <div id="purchaseCalendar" class="calendar-wrap"></div>
       </div>
     </section>
@@ -1724,6 +1760,7 @@
       billType: document.getElementById("billType"),
       billDay: document.getElementById("billDay"),
       billStartMonth: document.getElementById("billStartMonth"),
+      billEndMonth: document.getElementById("billEndMonth"),
       billDate: document.getElementById("billDate"),
       billRecurringDayWrap: document.getElementById("billRecurringDayWrap"),
       billOneTimeDateWrap: document.getElementById("billOneTimeDateWrap"),
@@ -2082,7 +2119,7 @@
       populatePurchaseDateOptions();
       renderDatalists();
       renderPaymentMethodOptions();
-      populateBillStartMonthOptions();
+      populateBillMonthOptions();
       renderBillPaymentMethodOptions();
       renderDashboard();
       renderBudgets();
@@ -2273,7 +2310,7 @@
                   Amount: ${formatCurrency(bill.amount)}<br>
                   Pay date: ${getBillDateForSelectedMonth(bill)}<br>
                   MOP: ${payment ? escapeHtml(payment.name) : "Deleted MOP / choose an active MOP"}<br>
-                  Type: ${bill.type === "recurring" ? "Recurring monthly" : "One-time"}
+                  Type: ${bill.type === "recurring" ? `Recurring monthly through ${formatMonthLabel(getBillEndMonth(bill))}` : "One-time"}
                 </div>
               </div>
 
@@ -2352,11 +2389,24 @@
         if (a.date !== b.date) return a.date.localeCompare(b.date);
         return Number(b.amount) - Number(a.amount);
       });
+      const bills = getBillsForSelectedMonth().slice().sort((a, b) => {
+        const aDate = getBillDateForSelectedMonth(a);
+        const bDate = getBillDateForSelectedMonth(b);
+        if (aDate !== bDate) return aDate.localeCompare(bDate);
+        return Number(b.amount) - Number(a.amount);
+      });
 
       const purchasesByDate = new Map();
       purchases.forEach(purchase => {
         if (!purchasesByDate.has(purchase.date)) purchasesByDate.set(purchase.date, []);
         purchasesByDate.get(purchase.date).push(purchase);
+      });
+
+      const billsByDate = new Map();
+      bills.forEach(bill => {
+        const billDate = getBillDateForSelectedMonth(bill);
+        if (!billsByDate.has(billDate)) billsByDate.set(billDate, []);
+        billsByDate.get(billDate).push(bill);
       });
 
       const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -2371,38 +2421,48 @@
         const dateValue = toDateInputValue(date);
         const inSelectedMonth = dateValue.slice(0, 7) === state.selectedMonth;
         const dayPurchases = inSelectedMonth ? (purchasesByDate.get(dateValue) || []) : [];
-        const dayTotal = dayPurchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+        const dayBills = inSelectedMonth ? (billsByDate.get(dateValue) || []) : [];
         const classes = ["calendar-day"];
 
         if (!inSelectedMonth) classes.push("outside-month");
         if (dateValue === todayValue) classes.push("today");
         if (dayPurchases.length) classes.push("has-purchases");
+        if (dayBills.length) classes.push("has-bills");
+
+        const badgeHtml = `
+          <div class="calendar-day-badges">
+            ${dayPurchases.length ? `<div class="calendar-day-count" aria-label="${dayPurchases.length} purchase(s)">${dayPurchases.length}</div>` : ""}
+            ${dayBills.length ? `<div class="calendar-day-bill-count" aria-label="${dayBills.length} paid bill(s)">${dayBills.length}</div>` : ""}
+          </div>
+        `;
 
         const dayContent = `
           <div class="calendar-day-head">
             <div class="calendar-day-number">${date.getDate()}</div>
-            ${dayPurchases.length ? `<div class="calendar-day-count" aria-label="${dayPurchases.length} purchase(s)">${dayPurchases.length}</div>` : ""}
+            ${dayPurchases.length || dayBills.length ? badgeHtml : ""}
           </div>
         `;
 
-        if (!dayPurchases.length) {
+        if (!dayPurchases.length && !dayBills.length) {
           return `<div class="${classes.join(" ")}">${dayContent}</div>`;
         }
 
         return `
-          <button type="button" class="${classes.join(" ")}" onclick="openCalendarDayDetails('${dateValue}')" title="View purchases for ${dateValue}">
+          <button type="button" class="${classes.join(" ")}" onclick="openCalendarDayDetails('${dateValue}')" title="View purchases and bills for ${dateValue}">
             ${dayContent}
           </button>
         `;
       }).join("");
 
-      const total = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      const purchaseTotal = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      const billTotal = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+      const total = purchaseTotal + billTotal;
 
       els.purchaseCalendar.innerHTML = `
         <div class="monthly-grand-total" style="margin-top:0;">
           <div>
-            <div class="label">Calendar Purchases</div>
-            <div class="muted small">${purchases.length} purchase(s) logged in ${formatMonthLabel(state.selectedMonth)}</div>
+            <div class="label">Calendar Purchases + Bills</div>
+            <div class="muted small">${purchases.length} purchase(s) and ${bills.length} paid bill(s) logged in ${formatMonthLabel(state.selectedMonth)}</div>
           </div>
           <div class="value">${formatCurrency(total)}</div>
         </div>
@@ -2418,9 +2478,15 @@
         .filter(purchase => purchase.date === dateValue)
         .sort((a, b) => Math.abs(Number(b.amount)) - Math.abs(Number(a.amount)) || a.name.localeCompare(b.name));
 
-      if (!purchases.length) return;
+      const bills = getBillsForSelectedMonth()
+        .filter(bill => getBillDateForSelectedMonth(bill) === dateValue)
+        .sort((a, b) => Number(b.amount) - Number(a.amount) || a.title.localeCompare(b.title));
 
-      const dayTotal = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      if (!purchases.length && !bills.length) return;
+
+      const purchaseTotal = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+      const billTotal = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+      const dayTotal = purchaseTotal + billTotal;
       const label = new Date(dateValue + "T00:00:00").toLocaleDateString(undefined, {
         weekday: "long",
         month: "long",
@@ -2429,31 +2495,55 @@
       });
 
       els.calendarDayModalTitle.textContent = label;
-      els.calendarDayModalSubtitle.textContent = `${purchases.length} purchase(s) · ${formatCurrency(dayTotal)} total · Sorted by cost`;
+      els.calendarDayModalSubtitle.textContent = `${purchases.length} purchase(s) · ${bills.length} paid bill(s) · ${formatCurrency(dayTotal)} total`;
 
-      els.calendarDayModalContent.innerHTML = `
-        <div class="list">
-          ${purchases.map(purchase => {
-            const payment = getPaymentMethodById(purchase.paymentMethodId);
-            const isReimbursement = Number(purchase.amount) < 0;
-            const needsAttention = getPurchaseSplits(purchase).some(part => normalizeTag(part.tag) === "untracked") || !payment;
+      const purchaseHtml = purchases.length
+        ? `<h3>Purchases</h3>
+          <div class="list" style="margin-bottom: 16px;">
+            ${purchases.map(purchase => {
+              const payment = getPaymentMethodById(purchase.paymentMethodId);
+              const isReimbursement = Number(purchase.amount) < 0;
+              const needsAttention = getPurchaseSplits(purchase).some(part => normalizeTag(part.tag) === "untracked") || !payment;
 
-            return `
-              <div class="list-item" ${needsAttention ? `style="background:#fef3c7;border-color:#facc15;"` : isReimbursement ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
-                <div>
-                  <div class="item-title">${escapeHtml(purchase.name)}${isSplitPurchase(purchase) ? getSplitSymbolHtml() : ""}</div>
-                  <div class="item-meta">
-                    ${getPurchaseSplits(purchase).map((part, index) => `Tag ${index + 1}: ${escapeHtml(part.tag)} · ${formatCurrency(part.amount)}`).join("<br>")}<br>
-                    MOP: ${payment ? escapeHtml(payment.name) : "Choose an active MOP"}
+              return `
+                <div class="list-item" ${needsAttention ? `style="background:#fef3c7;border-color:#facc15;"` : isReimbursement ? `style="background:#ecfdf5;border-color:#bbf7d0;"` : ""}>
+                  <div>
+                    <div class="item-title">${escapeHtml(purchase.name)}${isSplitPurchase(purchase) ? getSplitSymbolHtml() : ""}</div>
+                    <div class="item-meta">
+                      ${getPurchaseSplits(purchase).map((part, index) => `Tag ${index + 1}: ${escapeHtml(part.tag)} · ${formatCurrency(part.amount)}`).join("<br>")}<br>
+                      MOP: ${payment ? escapeHtml(payment.name) : "Choose an active MOP"}
+                    </div>
                   </div>
+                  <div class="item-amount">${formatCurrency(purchase.amount)}</div>
                 </div>
-                <div class="item-amount">${formatCurrency(purchase.amount)}</div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      `;
+              `;
+            }).join("")}
+          </div>`
+        : `<h3>Purchases</h3><div class="empty" style="margin-bottom: 16px;">No purchases on this day.</div>`;
 
+      const billHtml = bills.length
+        ? `<h3>Bills Paid</h3>
+          <div class="list">
+            ${bills.map(bill => {
+              const payment = getPaymentMethodById(bill.paymentMethodId);
+              return `
+                <div class="list-item" style="background:#fff7ed;border-color:#fdba74;">
+                  <div>
+                    <div class="item-title">${escapeHtml(bill.title)}</div>
+                    <div class="item-meta">
+                      Pay date: ${getBillDateForSelectedMonth(bill)}<br>
+                      MOP: ${payment ? escapeHtml(payment.name) : "Choose an active MOP"}<br>
+                      Type: ${bill.type === "recurring" ? `Recurring monthly through ${formatMonthLabel(getBillEndMonth(bill))}` : "One-time"}
+                    </div>
+                  </div>
+                  <div class="item-amount">${formatCurrency(bill.amount)}</div>
+                </div>
+              `;
+            }).join("")}
+          </div>`
+        : `<h3>Bills Paid</h3><div class="empty">No bills paid on this day.</div>`;
+
+      els.calendarDayModalContent.innerHTML = `${purchaseHtml}${billHtml}`;
       els.calendarDayModalBackdrop.classList.add("show");
     }
 
@@ -3219,7 +3309,7 @@
                     <div class="item-title">${escapeHtml(bill.title)}</div>
                     <div class="item-meta">
                       Pay date: ${getBillDateForSelectedMonth(bill)}<br>
-                      Type: ${bill.type === "recurring" ? "Recurring monthly" : "One-time"}
+                      Type: ${bill.type === "recurring" ? `Recurring monthly through ${formatMonthLabel(getBillEndMonth(bill))}` : "One-time"}
                     </div>
                   </div>
                   <div class="item-amount">${formatCurrency(bill.amount)}</div>
@@ -3394,6 +3484,7 @@
       const type = els.billType.value;
       const day = Number(els.billDay.value);
       const startMonth = els.billStartMonth.value || state.selectedMonth;
+      const endMonth = els.billEndMonth.value || startMonth;
       const date = els.billDate.value;
 
       if (!title) return showNotice("Bill title is required.", "error");
@@ -3414,6 +3505,14 @@
           return showNotice("Recurring bill starting month is invalid.", "error");
         }
 
+        if (!/^\d{4}-\d{2}$/.test(endMonth)) {
+          return showNotice("Recurring bill ending month is invalid.", "error");
+        }
+
+        if (endMonth < startMonth) {
+          return showNotice("Recurring bill ending month must be the same as or after the starting month.", "error");
+        }
+
         billDay = day;
         billDate = `${startMonth}-${String(Math.min(day, getDaysInMonth(startMonth))).padStart(2, "0")}`;
       } else {
@@ -3431,6 +3530,11 @@
         bill.date = billDate;
         bill.day = billDay;
         bill.type = type;
+        if (type === "recurring") {
+          bill.endMonth = endMonth;
+        } else {
+          delete bill.endMonth;
+        }
       } else {
         state.data.bills.push({
           id: createId(),
@@ -3439,7 +3543,8 @@
           paymentMethodId,
           date: billDate,
           day: billDay,
-          type
+          type,
+          ...(type === "recurring" ? { endMonth } : {})
         });
       }
 
@@ -3462,8 +3567,9 @@
       els.billPaymentMethod.value = bill.paymentMethodId || "";
       els.billType.value = bill.type;
       els.billDay.value = bill.day || Number(bill.date.slice(8, 10));
-      populateBillStartMonthOptions(bill.date.slice(0, 7));
+      populateBillMonthOptions(bill.date.slice(0, 7), getBillEndMonth(bill));
       els.billStartMonth.value = bill.date.slice(0, 7);
+      els.billEndMonth.value = getBillEndMonth(bill);
       els.billDate.value = bill.date;
       els.cancelBillEditBtn.classList.remove("hidden");
       syncBillTypeFields();
@@ -3791,7 +3897,7 @@
 
     function exportData() {
       const exportPayload = {
-        app: "Financial Tracker",
+        app: "Budgeting and Financial Tracker",
         version: 14,
         exportedAt: new Date().toISOString(),
         data: state.data
@@ -3804,7 +3910,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `financial-tracker-${getCurrentMonth()}.json`;
+      link.download = `budgeting-financial-tracker-${getCurrentMonth()}.json`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -3904,7 +4010,7 @@
         const billStartMonth = bill.date.slice(0, 7);
 
         if (bill.type === "recurring") {
-          return billStartMonth <= yearMonth;
+          return billStartMonth <= yearMonth && yearMonth <= getBillEndMonth(bill);
         }
 
         return billStartMonth === yearMonth;
@@ -3925,6 +4031,12 @@
       }
 
       return bills;
+    }
+
+    function getBillEndMonth(bill) {
+      return bill.endMonth && /^\d{4}-\d{2}$/.test(bill.endMonth)
+        ? bill.endMonth
+        : bill.date.slice(0, 7);
     }
 
     function getBillDateForSelectedMonth(bill) {
@@ -4128,7 +4240,8 @@
           typeof bill.date === "string" &&
           /^\d{4}-\d{2}-\d{2}$/.test(bill.date) &&
           ["recurring", "one-time"].includes(bill.type) &&
-          (bill.day === undefined || (Number.isFinite(Number(bill.day)) && Number(bill.day) >= 1 && Number(bill.day) <= 31));
+          (bill.day === undefined || (Number.isFinite(Number(bill.day)) && Number(bill.day) >= 1 && Number(bill.day) <= 31)) &&
+          (bill.endMonth === undefined || /^\d{4}-\d{2}$/.test(bill.endMonth));
       });
 
       const giftCardsValid = (value.giftCards || []).every(card => {
@@ -4192,7 +4305,8 @@
           paymentMethodId: String(bill.paymentMethodId || ""),
           date: bill.date,
           day: bill.day ? Number(bill.day) : Number(bill.date.slice(8, 10)),
-          type: bill.type
+          type: bill.type,
+          ...(bill.type === "recurring" ? { endMonth: bill.endMonth || bill.date.slice(0, 7) } : {})
         })),
         giftCards: (data.giftCards || []).map(card => ({
           id: String(card.id),
@@ -4220,7 +4334,7 @@
       }, 3500);
     }
 
-    function populateBillStartMonthOptions(selectedValue = els.billStartMonth.value || state.selectedMonth) {
+    function populateBillMonthOptions(startSelectedValue = els.billStartMonth.value || state.selectedMonth, endSelectedValue = els.billEndMonth.value || startSelectedValue || state.selectedMonth) {
       const selectedYear = Number(state.selectedMonth.slice(0, 4));
       const values = new Set();
 
@@ -4230,21 +4344,23 @@
         }
       }
 
-      if (selectedValue && /^\d{4}-\d{2}$/.test(selectedValue)) {
-        values.add(selectedValue);
-      }
+      [startSelectedValue, endSelectedValue].forEach(value => {
+        if (value && /^\d{4}-\d{2}$/.test(value)) values.add(value);
+      });
 
       const sortedValues = Array.from(values).sort();
-
-      els.billStartMonth.innerHTML = sortedValues
+      const monthOptionsHtml = sortedValues
         .map(value => `<option value="${value}">${formatMonthLabel(value)}</option>`)
         .join("");
 
-      els.billStartMonth.value = selectedValue;
+      els.billStartMonth.innerHTML = monthOptionsHtml;
+      els.billEndMonth.innerHTML = monthOptionsHtml;
 
-      if (!els.billStartMonth.value) {
-        els.billStartMonth.value = state.selectedMonth;
-      }
+      els.billStartMonth.value = startSelectedValue;
+      els.billEndMonth.value = endSelectedValue;
+
+      if (!els.billStartMonth.value) els.billStartMonth.value = state.selectedMonth;
+      if (!els.billEndMonth.value) els.billEndMonth.value = els.billStartMonth.value || state.selectedMonth;
     }
 
     function setDefaultPurchaseDate() {
@@ -4258,8 +4374,9 @@
     function setDefaultBillInputs() {
       const today = new Date();
       els.billDay.value = String(today.getDate());
-      populateBillStartMonthOptions(state.selectedMonth);
+      populateBillMonthOptions(state.selectedMonth, state.selectedMonth);
       els.billStartMonth.value = state.selectedMonth;
+      els.billEndMonth.value = state.selectedMonth;
       els.billDate.value = toDateInputValue(today);
       syncBillTypeFields();
     }
